@@ -32,12 +32,13 @@ function createWindow() {
 
   ipcMain.on('loginOrRegister', (e, isLogin) => {
     console.log('收到渲染进程消息:', isLogin)
-
+    mainWindow.resizable = true
     if (isLogin) {
       mainWindow.setSize(login_width, login_height)
     } else {
       mainWindow.setSize(login_width, register_height)
     }
+    mainWindow.resizable = false
   })
 
   // 如果是开发环境，打开开发者工具

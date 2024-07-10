@@ -4,6 +4,7 @@ import vue from '@vitejs/plugin-vue'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+import path from 'path'
 export default defineConfig({
   main: {
     plugins: [externalizeDepsPlugin()]
@@ -14,7 +15,7 @@ export default defineConfig({
   renderer: {
     resolve: {
       alias: {
-        '@': resolve('src/renderer/src')
+        '@': path.resolve(__dirname, 'src/renderer/src')
       }
     },
     plugins: [
@@ -25,6 +26,19 @@ export default defineConfig({
       Components({
         resolvers: [ElementPlusResolver()]
       })
-    ]
+    ],
+    server: {
+      hmr: true,
+      port: 5173,
+      proxy: {
+        '/api': {
+          target: 'http://localhost:5050',
+          changeOrigin: true,
+          pathRewrite: {
+            '^/api': '/api'
+          }
+        }
+      }
+    }
   }
 })
