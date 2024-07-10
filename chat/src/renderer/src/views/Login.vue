@@ -26,6 +26,12 @@ const changeOpType = () => {
   window.ipcRenderer.send('loginOrRegister', isLogin.value)
   // 切换登录状态
   isLogin.value = !isLogin.value
+  // 切换登录状态后，清空表单数据
+  nextTick(() => {
+    formDataRef.value.resetFields()
+    formData.value = {}
+    cleanVerify()
+  })
 }
 
 // 提交表单
@@ -36,8 +42,17 @@ const submit = async () => {
   if (!checkValue('checkEmail', formData.value.email, '邮箱格式不正确')) {
     return
   }
+  //验证昵称
+  if (!isLogin.value && !checkValue(null, formData.value.nickName, '请输入昵称')) {
+    return
+  }
   // 验证密码格式
   if (!checkValue('checkPassword', formData.value.password, '密码只能为数字,字母,特殊符号,2-6位')) {
+    return
+  }
+  //验证密码是否相等
+  if (!isLogin.value && formData.value.password != formData.value.rePassword) {
+    errorMsg.value = '两次密码输入不一致'
     return
   }
   // 验证验证码是否输入
@@ -79,7 +94,14 @@ const clearVerify = () => {
       <el-form :model="formData" ref="formDataRef" @submit.prevent label-width="0px">
         <!--邮箱-->
         <el-form-item prop="email">
-          <el-input size="large" clearable placeholder="请输入邮箱" v-model.trim="formData.email">
+          <el-input
+            size="large"
+            clearable
+            placeholder="请输入邮箱"
+            v-model.trim="formData.email"
+            maxlength="30"
+            @focus="clearVerify"
+          >
             <template #prefix>
               <span class="iconfont icon-email"></span>
             </template>
@@ -92,6 +114,7 @@ const clearVerify = () => {
             clearable
             placeholder="请输入昵称"
             v-model.trim="formData.nickName"
+            @focus="clearVerify"
           >
             <template #prefix>
               <span class="iconfont icon-user-nick"></span>
@@ -106,6 +129,7 @@ const clearVerify = () => {
             placeholder="请输入密码"
             v-model.trim="formData.password"
             show-password
+            @focus="clearVerify"
           >
             <template #prefix>
               <span class="iconfont icon-password"></span>
@@ -120,6 +144,7 @@ const clearVerify = () => {
             placeholder="请再次输入密码"
             v-model.trim="formData.rePassword"
             show-password
+            @focus="clearVerify"
           >
             <template #prefix>
               <span class="iconfont icon-password"></span>
@@ -133,6 +158,7 @@ const clearVerify = () => {
             clearable
             placeholder="请输入验证码"
             v-model.trim="formData.checkCode"
+            @focus="clearVerify"
           >
             <template #prefix>
               <span class="iconfont icon-checkCode"></span>
