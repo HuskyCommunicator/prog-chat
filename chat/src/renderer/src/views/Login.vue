@@ -9,6 +9,7 @@ const rules = {
 //
 const isLogin = ref(true)
 const changeOpType = () => {
+  window.ipcRenderer.send('loginOrRegister', isLogin.value)
   isLogin.value = !isLogin.value
 }
 </script>
