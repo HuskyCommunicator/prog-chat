@@ -3,7 +3,7 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-
+import { onLoginOrRegister, onLoginSuccess } from './ipc.js'
 const NODE_ENV = process.env.NODE_ENV
 const login_width = 300
 const login_height = 370
@@ -30,17 +30,6 @@ function createWindow() {
     }
   })
 
-  ipcMain.on('loginOrRegister', (e, isLogin) => {
-    console.log('收到渲染进程消息:', isLogin)
-    mainWindow.resizable = true
-    if (isLogin) {
-      mainWindow.setSize(login_width, login_height)
-    } else {
-      mainWindow.setSize(login_width, register_height)
-    }
-    mainWindow.resizable = false
-  })
-
   // 如果是开发环境，打开开发者工具
   if (NODE_ENV === 'development') {
     mainWindow.webContents.openDevTools()
@@ -65,6 +54,23 @@ function createWindow() {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  //监听登陆注册
+  onLoginOrRegister((isLogin) => {
+    mainWindow.resizable = true
+    if (isLogin) {
+      mainWindow.setSize(login_width, login_height)
+    } else {
+      mainWindow.setSize(login_width, register_height)
+    }
+    mainWindow.resizable = false
+  })
+  //监听登录成功后的主页面跳转
+  onLoginSuccess((config) => {
+    mainWindow.resizable = true
+    mainWindow.setSize(850, 800), mainWindow.center(), (mainWindow.setMaximizable = true)
+    mainWindow.setMinimumSize(800, 600), (mainWindow.resizable = false)
+  })
 }
 
 // 当Electron完成初始化并准备创建浏览器窗口时，将调用此方法

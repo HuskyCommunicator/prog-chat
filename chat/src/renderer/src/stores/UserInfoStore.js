@@ -5,7 +5,7 @@ export const useUserInfoStore = defineStore('userInfo', {
       userInfo: {}
     }
   },
-  action: {
+  actions: {
     setInfo(userInfo) {
       this.userInfo = userInfo
       localStorage.setItem('userInfo', JSON.stringify(userInfo))

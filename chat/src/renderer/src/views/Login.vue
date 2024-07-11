@@ -13,7 +13,7 @@ const UserInfoStore = useUserInfoStore()
 const router = useRouter()
 // 存储表单数据
 const formData = ref({
-  email: '123@qq.com',
+  email: 'test@qq.com',
   password: '123'
 })
 // 存储表单数据的引用
@@ -82,6 +82,9 @@ const submit = async () => {
   if (errorMsg.value) {
     return
   }
+  if (isLogin.value) {
+    showLoading.value = true
+  }
   let result = await proxy.Request({
     url: isLogin.value ? proxy.Api.login : proxy.Api.register,
     showLogin: isLogin.value ? false : true,
@@ -99,22 +102,23 @@ const submit = async () => {
       errorMsg.value = response.info
     }
   })
-  console.log({
-    email: formData.value.email,
-    nickName: formData.value.nickName,
-    password: isLogin.value ? md5(formData.value.password) : formData.value.password,
-    checkCode: formData.value.checkCode,
-    checkCodeKey: localStorage.getItem('checkCodeKey')
-  })
   if (!result) {
     return
   }
-  console.log(result.data)
   if (isLogin.value) {
-    console.log(result.data)
     UserInfoStore.setInfo(result.data)
     localStorage.setItem('token', result.data.token)
     router.push('/main')
+    const screenWidth = window.screen.width
+    const screenHeight = window.screen.height
+    window.ipcRenderer.send('openChat', {
+      email: formData.value.email,
+      token: result.data.token,
+      userId: result.data.userId,
+      nickName: result.data.nickName,
+      screenWidth: screenWidth,
+      screenHeight: screenHeight
+    })
   } else {
     proxy.Message.success('注册成功，请登录')
     changeOpType()
@@ -143,7 +147,10 @@ onMounted(() => {
   <div class="login-panel">
     <!-- 标题 -->
     <div class="title drag">Easy Chat</div>
-    <div class="login-form">
+    <div v-if="showLoading" class="loading-panel">
+      <img src="@/assets/img/loading.gif" alt="" />
+    </div>
+    <div class="login-form" v-else>
       <!-- 错误消息 -->
       <div class="error-msg">{{ errorMsg }}</div>
       <!-- 表单 -->
