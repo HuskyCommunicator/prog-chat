@@ -4,6 +4,7 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { onLoginOrRegister, onLoginSuccess } from './ipc.js'
+
 const NODE_ENV = process.env.NODE_ENV
 const login_width = 300
 const login_height = 370
@@ -68,8 +69,14 @@ function createWindow() {
   //监听登录成功后的主页面跳转
   onLoginSuccess((config) => {
     mainWindow.resizable = true
-    mainWindow.setSize(850, 800), mainWindow.center(), (mainWindow.setMaximizable = true)
-    mainWindow.setMinimumSize(800, 600), (mainWindow.resizable = false)
+    mainWindow.setSize(850, 800)
+    mainWindow.center()
+    mainWindow.setMaximizable = true
+    mainWindow.setMinimumSize(800, 600)
+    mainWindow.resizable = false
+    //管理员窗口操作
+    if (config.admin) {
+    }
   })
 }
 
