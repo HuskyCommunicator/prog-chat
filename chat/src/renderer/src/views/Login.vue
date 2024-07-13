@@ -4,6 +4,7 @@ import { ref, reactive, getCurrentInstance, nextTick, onMounted } from 'vue'
 import md5 from 'js-md5'
 import { useUserInfoStore } from '@/stores/UserInfoStore.js'
 import { useRouter } from 'vue-router'
+import WinOp from '../components/WinOp.vue'
 // 获取当前实例的代理对象
 const { proxy } = getCurrentInstance()
 
@@ -245,6 +246,8 @@ onMounted(() => {
       </el-form>
     </div>
   </div>
+  <!-- 窗口组件 -->
+  <WinOp :showSetIop="false" :showMin="false" :showMax="false" :closeType="0"></WinOp>
 </template>
 
 <style lang="scss" scoped>

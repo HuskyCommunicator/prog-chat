@@ -10,14 +10,20 @@ import router from '@/router'
 import utils from '@/utils/utils.js'
 import verify from '@/utils/verify.js'
 import request from '@/utils/request.js'
-// import request from './utils/request.js'
+
 import message from '@/utils/message.js'
 import api from '@/utils/api.js'
+import layout from '@/components/layout.vue'
+import WinOp from '@/components/WinOp.vue'
+import ContentPanel from '@/components/ContentPanel.vue'
 const app = createApp(App)
 
 app.use(ElementPlus)
 app.use(router)
 app.use(Pinia.createPinia())
+app.component('WinOp', WinOp)
+app.component('Layout', layout)
+app.component('ContentPanel', ContentPanel)
 app.config.globalProperties.Utils = utils
 app.config.globalProperties.Verify = verify
 app.config.globalProperties.Request = request

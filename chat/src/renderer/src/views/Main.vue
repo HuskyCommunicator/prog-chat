@@ -70,6 +70,8 @@ const changeMenu = (item) => {
       </router-view>
     </div>
   </div>
+  <!-- 窗口组件 -->
+  <WinOp :closeType="1"></WinOp>
 </template>
 
 <style lang="scss" scoped>
@@ -91,7 +93,6 @@ const changeMenu = (item) => {
   border: 1px solid #2e2e2e;
   border-right: none;
   padding-bottom: 10px;
-  height: calc(100vh);
 }
 
 .main .left-sider .menu-list {
@@ -116,7 +117,7 @@ const changeMenu = (item) => {
   color: #07c160;
 }
 
-.main .left-sider .menu-buttom {
+.main .left-sider .menu-bottom {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;

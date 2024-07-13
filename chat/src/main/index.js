@@ -1,9 +1,9 @@
 // 导入electron相关的模块
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, Menu, Tray } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { onLoginOrRegister, onLoginSuccess } from './ipc.js'
+import { onLoginOrRegister, onLoginSuccess, winTitleOp } from './ipc.js'
 
 const NODE_ENV = process.env.NODE_ENV
 const login_width = 300
@@ -31,10 +31,10 @@ function createWindow() {
     }
   })
 
-  // 如果是开发环境，打开开发者工具
-  if (NODE_ENV === 'development') {
-    mainWindow.webContents.openDevTools()
-  }
+  // // 如果是开发环境，打开开发者工具
+  // if (NODE_ENV === 'development') {
+  //   mainWindow.webContents.openDevTools()
+  // }
 
   // 当窗口准备好显示时，显示窗口
   mainWindow.on('ready-to-show', () => {
@@ -55,6 +55,29 @@ function createWindow() {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+  //托盘
+  const tray = new Tray(icon)
+  const contextMenu = [
+    {
+      label: '显示主页面',
+      click: () => {
+        mainWindow.show()
+      }
+    },
+    {
+      label: '退出',
+      click: () => {
+        app.exit()
+      }
+    }
+  ]
+  const menu = Menu.buildFromTemplate(contextMenu)
+  tray.setContextMenu(menu)
+  tray.setToolTip('Chat')
+  tray.on('click', () => {
+    mainWindow.setSkipTaskbar(false)
+    mainWindow.show()
+  })
 
   //监听登陆注册
   onLoginOrRegister((isLogin) => {
@@ -71,11 +94,58 @@ function createWindow() {
     mainWindow.resizable = true
     mainWindow.setSize(850, 800)
     mainWindow.center()
-    mainWindow.setMaximizable = true
+    mainWindow.setMaximizable(true)
     mainWindow.setMinimumSize(800, 600)
-    mainWindow.resizable = false
     //管理员窗口操作
     if (config.admin) {
+    }
+    contextMenu.unshift({
+      label: '用户:' + config.nickName,
+      click: () => {}
+    })
+    tray.setContextMenu(Menu.buildFromTemplate(contextMenu))
+  })
+  //监听
+  winTitleOp((e, { action, data }) => {
+    const webContents = e.sender
+    const win = BrowserWindow.fromWebContents(webContents)
+    switch (action) {
+      //关闭
+      case 'close': {
+        if (data.closeType == 0) {
+          //若应用还未登录，则关闭应用
+          win.close()
+        } else {
+          //若应用已登录，则最小化到托盘
+          win.setSkipTaskbar(true)
+          win.hide()
+        }
+        break
+      }
+
+      //最小化
+      case 'minimize': {
+        win.minimize()
+        break
+      }
+
+      //最大化-当前应用未最大化
+      case 'maximize': {
+        win.maximize()
+        break
+      }
+
+      //最大化-当前应用已最大化
+      case 'unmaximize': {
+        win.unmaximize()
+        break
+      }
+
+      //置顶
+      case 'top': {
+        win.setAlwaysOnTop(data.top)
+        break
+      }
     }
   })
 }
