@@ -24,7 +24,7 @@ const props = defineProps({
   // 关闭类型 0关闭 1隐藏
   closeType: {
     type: String,
-    default: 1
+    default: '1'
   }
 })
 

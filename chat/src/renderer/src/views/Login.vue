@@ -14,8 +14,8 @@ const UserInfoStore = useUserInfoStore()
 const router = useRouter()
 // 存储表单数据
 const formData = ref({
-  email: 'test@qq.com',
-  password: '123'
+  email: '11@qq.com',
+  password: '11'
 })
 // 存储表单数据的引用
 const formDataRef = ref()

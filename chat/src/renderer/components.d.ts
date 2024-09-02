@@ -7,16 +7,22 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AvatarBase: typeof import('./src/components/AvatarBase.vue')['default']
     Blank: typeof import('./src/components/Blank.vue')['default']
     ContentPage: typeof import('./src/components/ContentPage.vue')['default']
     ContentPanel: typeof import('./src/components/ContentPanel.vue')['default']
+    Dialog: typeof import('./src/components/Dialog.vue')['default']
     ElButton: typeof import('element-plus/es')['ElButton']
+    ElDialog: typeof import('element-plus/es')['ElDialog']
     ElForm: typeof import('element-plus/es')['ElForm']
     ElFormItem: typeof import('element-plus/es')['ElFormItem']
+    ElImage: typeof import('element-plus/es')['ElImage']
     ElInput: typeof import('element-plus/es')['ElInput']
     Layout: typeof import('./src/components/Layout.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    ShowLocalImage: typeof import('./src/components/ShowLocalImage.vue')['default']
+    UserBaseInfo: typeof import('./src/components/UserBaseInfo.vue')['default']
     WinOp: typeof import('./src/components/WinOp.vue')['default']
   }
 }

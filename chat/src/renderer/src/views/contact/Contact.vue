@@ -103,7 +103,7 @@ const partJump = (data) => {
               <div class="text">{{ sub.name }}</div>
             </div>
             <!-- 从接口获取数据 -->
-            <template v-for="contact in contactData"> </template>
+            <template v-for="contact in item.contactData"> </template>
             <template v-if="item.contactData && item.contactData.length == 0">
               <div class="no-data">{{ item.emptyMsg }}</div>
             </template>

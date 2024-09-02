@@ -4,4 +4,10 @@ const isEmpty = (str) => {
   }
   return false
 }
-export default { isEmpty }
+const getAreaInfo = (data) => {
+  if (isEmpty(data)) {
+    return '-'
+  }
+  return data.replace(',', ' ')
+}
+export default { isEmpty, getAreaInfo }
