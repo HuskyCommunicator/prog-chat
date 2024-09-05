@@ -100,7 +100,6 @@ const loadContact = async (contactType) => {
     partList.value[2].contactData = result.data;
   } else if (contactType == "USER") {
     partList.value[3].contactData = result.data;
-    console.log(partList.value[3].contactData);
   }
 };
 loadContact("GROUP");
@@ -115,11 +114,10 @@ const contactDetail = (contact, item) => {};
     <!-- 左侧内容 -->
     <template #left-content>
       <div class="drag-panel drag"></div>
-      <!-- 搜索框 -->
       <div class="top-search">
         <el-input
           clearable
-          placeholder="搜索内容"
+          placeholder="搜索"
           v-model="searchKey"
           size="small"
           @keyup="search"
@@ -129,7 +127,6 @@ const contactDetail = (contact, item) => {};
           </template>
         </el-input>
       </div>
-      <!-- 联系人列表 -->
       <div class="contact-list">
         <template v-for="item in partList">
           <div>
@@ -146,22 +143,24 @@ const contactDetail = (contact, item) => {};
                 ></div>
                 <div class="text">{{ sub.name }}</div>
               </div>
-              <template v-for="contact in item.contactData"> </template>
               <!-- 从接口获取数据 -->
-              <div
-                :class="[
-                  'part-item',
-                  contact[item.contactId] == route.query.contactId
-                    ? 'active'
-                    : '',
-                ]"
-                @click="contactDetail(contact, item)"
-              >
-                <Avatar :userId="contact[item.contactId]" :width="35"></Avatar>
-                <div class="text">{{ contact[item.contactName] }}</div>
-              </div>
-
-              <!--  -->
+              <template v-for="contact in item.contactData">
+                <div
+                  :class="[
+                    'part-item',
+                    contact[item.contactId] == route.query.contactId
+                      ? 'active'
+                      : '',
+                  ]"
+                  @click="contactDetail(contact, item)"
+                >
+                  <Avatar
+                    :userId="contact[item.contactId]"
+                    :width="35"
+                  ></Avatar>
+                  <div class="text">{{ contact[item.contactName] }}</div>
+                </div>
+              </template>
               <template v-if="item.contactData && item.contactData.length == 0">
                 <div class="no-data">{{ item.emptyMsg }}</div>
               </template>
@@ -170,7 +169,9 @@ const contactDetail = (contact, item) => {};
         </template>
       </div>
     </template>
+
     <!-- 右侧内容 -->
+
     <template #right-content>
       <div class="title-panel drag">{{ rightTitle }}</div>
       <router-view v-slot="{ Component }">

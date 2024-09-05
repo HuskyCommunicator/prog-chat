@@ -38,8 +38,8 @@ const getContactInfo = async () => {
     if (!result) {
       return;
     }
+    userInfo.value = Object.assign({}, result.data);
   }
-  userInfo.value = Object.assign({}, result.data);
 };
 const sendMessage = () => {};
 const addContact = () => {};
