@@ -1,11 +1,12 @@
 <script setup>
-import { ref, getCurrentInstance, onMounted } from "vue";
+import { ref, getCurrentInstance, onMounted, watch } from "vue";
 import Layout from "../../components/Layout.vue";
 import { useRoute, useRouter } from "vue-router";
 import Avatar from "../../components/Avatar.vue";
+import { useContactStateStore } from "../../stores/ContactStateStore";
 // 获取当前实例
 const { proxy } = getCurrentInstance();
-
+const contactStateStore = useContactStateStore();
 // 路由相关
 const route = useRoute();
 const router = useRouter();
@@ -102,11 +103,28 @@ const loadContact = async (contactType) => {
     partList.value[3].contactData = result.data;
   }
 };
-loadContact("GROUP");
-loadContact("USER");
-onMounted(() => {});
+
+onMounted(() => {
+  loadContact("GROUP");
+  loadContact("USER");
+});
+
 const contactDetail = (contact, item) => {};
-//loadContact("GROUP");
+watch(
+  () => contactStateStore.contactReload,
+  (newVal, oldVal) => {
+    if (!newVal) {
+      return;
+    }
+    switch (newVal) {
+      case "USER":
+      case "GROUP":
+        loadContact(newVal);
+        break;
+    }
+  },
+  {},
+);
 </script>
 
 <template>
@@ -169,15 +187,13 @@ const contactDetail = (contact, item) => {};
         </template>
       </div>
     </template>
-
-    <!-- 右侧内容 -->
-
     <template #right-content>
       <div class="title-panel drag">{{ rightTitle }}</div>
       <router-view v-slot="{ Component }">
         <component :is="Component" ref="componentRef"></component>
       </router-view>
     </template>
+    <!-- 右侧内容 -->
   </Layout>
 </template>
 

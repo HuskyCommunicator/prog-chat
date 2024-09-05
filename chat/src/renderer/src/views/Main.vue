@@ -1,35 +1,49 @@
 <script setup>
-import { ref, reactive, getCurrentInstance, nextTick } from 'vue'
-import { useRouter } from 'vue-router'
-const router = useRouter()
-const { proxy } = getCurrentInstance()
+import { ref, reactive, getCurrentInstance, nextTick, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { useUserInfoStore } from "@/stores/UserInfoStore";
+const userInfoStore = useUserInfoStore();
+const router = useRouter();
+const { proxy } = getCurrentInstance();
 const menuList = ref([
   {
-    name: 'chat',
-    icon: 'icon-chat',
-    path: '/chat',
-    countKey: 'chatCount',
-    position: 'top'
+    name: "chat",
+    icon: "icon-chat",
+    path: "/chat",
+    countKey: "chatCount",
+    position: "top",
   },
   {
-    name: 'contact',
-    icon: 'icon-user',
-    path: '/contact',
-    countKey: 'contactApplyCount',
-    position: 'top'
+    name: "contact",
+    icon: "icon-user",
+    path: "/contact",
+    countKey: "contactApplyCount",
+    position: "top",
   },
   {
-    name: 'mysetting',
-    icon: 'icon-more2',
-    path: '/setting',
-    position: 'bottom'
-  }
-])
-const currentMenu = ref(menuList.value[0])
+    name: "mysetting",
+    icon: "icon-more2",
+    path: "/setting",
+    position: "bottom",
+  },
+]);
+const currentMenu = ref(menuList.value[0]);
 const changeMenu = (item) => {
-  currentMenu.value = item
-  router.push(item.path)
-}
+  currentMenu.value = item;
+  router.push(item.path);
+};
+const getLoginInfo = async () => {
+  let result = await proxy.Request({
+    url: proxy.Api.getUserInfo,
+  });
+  if (!result) {
+    return;
+  }
+  userInfoStore.setInfo(result.data);
+};
+onMounted(() => {
+  getLoginInfo;
+});
 </script>
 
 <template>
@@ -41,7 +55,11 @@ const changeMenu = (item) => {
       <div class="menu-list">
         <template v-for="item in menuList">
           <div
-            :class="['tab-item iconfont', item.icon, item.path == currentMenu.path ? 'active' : '']"
+            :class="[
+              'tab-item iconfont',
+              item.icon,
+              item.path == currentMenu.path ? 'active' : '',
+            ]"
             v-if="item.position === 'top'"
             @click="changeMenu(item)"
           >
@@ -54,7 +72,11 @@ const changeMenu = (item) => {
       <div class="menu-list menu-bottom">
         <template v-for="item in menuList">
           <div
-            :class="['tab-item iconfont', item.icon, item.path == currentMenu.path ? 'active' : '']"
+            :class="[
+              'tab-item iconfont',
+              item.icon,
+              item.path == currentMenu.path ? 'active' : '',
+            ]"
             v-if="item.position === 'bottom'"
             @click="changeMenu(item)"
           ></div>

@@ -2,6 +2,8 @@
 // 从 'vue' 导入必要的函数和对象
 import { ref, reactive, getCurrentInstance, nextTick } from "vue";
 import { useUserInfoStore } from "@/stores/UserInfoStore";
+import { useContactStateStore } from "../../stores/ContactStateStore";
+const contactStateStore = useContactStateStore();
 // 获取当前实例代理
 const { proxy } = getCurrentInstance();
 const userInfoStore = useUserInfoStore();
@@ -51,6 +53,9 @@ const submitApply = async () => {
   }
   dialogConfig.show = false;
   emit("reload");
+  if (result.data == 0) {
+    contactStateStore.setContactReload(contactType);
+  }
 };
 
 // 显示对话框函数
