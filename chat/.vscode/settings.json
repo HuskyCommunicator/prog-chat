@@ -8,5 +8,10 @@
   "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "cSpell.words": ["iconfont"]
+  "cSpell.words": ["iconfont", "okfun"],
+  "editor.fontLigatures": false,
+  "cSpell.languageSettings": [],
+
+  "editor.wordWrap": "wordWrapColumn",
+  "editor.wordWrapColumn": 140 // 你可以根据需要修改这个值
 }
