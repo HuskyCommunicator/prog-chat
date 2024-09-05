@@ -1,14 +1,22 @@
 <script setup>
 import { ref, reactive, getCurrentInstance, nextTick } from 'vue'
-
 import Layout from '../../components/Layout.vue'
 import { useRoute, useRouter } from 'vue-router'
+
+// 获取当前实例
+const { proxy } = getCurrentInstance()
+
+// 路由相关
 const route = useRoute()
 const router = useRouter()
 
-const { proxy } = getCurrentInstance()
+// 搜索关键字
 const searchKey = ref('')
+
+// 搜索函数
 const search = () => {}
+
+// 部分列表数据
 const partList = ref([
   {
     partName: '新朋友',
@@ -64,15 +72,21 @@ const partList = ref([
     emptyMsg: '暂无好友'
   }
 ])
+
+// 右侧标题
 const rightTitle = ref('')
+
+// 部分跳转函数
 const partJump = (data) => {
   if (data.showTitle) {
     rightTitle.value = data.name
   } else {
     rightTitle.value = null
   }
-  //处理消息已读
-  router.push(data.path)
+  // 处理消息已读
+  router.push(data.path).catch((err) => {
+    console.error('Navigation error:', err)
+  })
 }
 </script>
 

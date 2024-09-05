@@ -71,7 +71,7 @@ const changeMenu = (item) => {
     </div>
   </div>
   <!-- 窗口组件 -->
-  <WinOp :closeType="1"></WinOp>
+  <WinOp :closeType="'1'"></WinOp>
 </template>
 
 <style lang="scss" scoped>

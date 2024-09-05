@@ -112,7 +112,7 @@ function createWindow() {
     switch (action) {
       //关闭
       case 'close': {
-        if (data.closeType == 0) {
+        if (data.closeType == '0') {
           //若应用还未登录，则关闭应用
           win.close()
         } else {

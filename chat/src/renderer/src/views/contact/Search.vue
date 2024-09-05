@@ -5,6 +5,8 @@ import { ref, computed, getCurrentInstance } from 'vue'
 // 导入用户信息存储
 import { useUserInfoStore } from '@/stores/UserInfoStore'
 import UserBaseInfo from '../../components/UserBaseInfo.vue'
+import SearchAdd from './SearchAdd.vue'
+
 // 初始化用户信息存储
 const userInfoStore = useUserInfoStore()
 
@@ -12,7 +14,7 @@ const userInfoStore = useUserInfoStore()
 const { proxy } = getCurrentInstance()
 
 // 将联系人ID和搜索结果初始化为响应式引用
-const contactId = ref('U04659410364')
+const contactId = ref('U85365553083')
 const searchResult = ref([])
 
 // 定义一个计算属性来确定内容类型名称
@@ -48,8 +50,16 @@ const search = async () => {
   // 更新搜索结果
   searchResult.value = result.data
   console.log(result.data)
+}
 
-  const applyContact = () => {}
+// 定义应用联系人函数
+const searchAddRef = ref('')
+const applyContact = () => {
+  if (searchAddRef.value && typeof searchAddRef.value.show === 'function') {
+    searchAddRef.value.show(searchResult.value)
+  } else {
+    console.error('searchAddRef is not properly initialized or show method is not defined')
+  }
 }
 </script>
 
@@ -98,6 +108,7 @@ const search = async () => {
     <!-- 结果为空 -->
     <div v-else class="no-data">没有搜到结果</div>
   </ContentPanel>
+  <SearchAdd ref="searchAddRef" @reload="resetFrom"></SearchAdd>
 </template>
 
 <style lang="scss" scoped>
