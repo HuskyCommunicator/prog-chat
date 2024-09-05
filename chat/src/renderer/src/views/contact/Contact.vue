@@ -1,93 +1,113 @@
 <script setup>
-import { ref, reactive, getCurrentInstance, nextTick } from 'vue'
-import Layout from '../../components/Layout.vue'
-import { useRoute, useRouter } from 'vue-router'
-
+import { ref, getCurrentInstance, onMounted } from "vue";
+import Layout from "../../components/Layout.vue";
+import { useRoute, useRouter } from "vue-router";
+import Avatar from "../../components/Avatar.vue";
 // 获取当前实例
-const { proxy } = getCurrentInstance()
+const { proxy } = getCurrentInstance();
 
 // 路由相关
-const route = useRoute()
-const router = useRouter()
+const route = useRoute();
+const router = useRouter();
 
 // 搜索关键字
-const searchKey = ref('')
+const searchKey = ref("");
 
 // 搜索函数
-const search = () => {}
+const search = () => {};
 
 // 部分列表数据
 const partList = ref([
   {
-    partName: '新朋友',
+    partName: "新朋友",
     children: [
       {
-        name: '搜好友',
-        icon: 'icon-search',
-        iconBgColor: '#fa9d3b',
-        path: '/contact/search'
+        name: "搜好友",
+        icon: "icon-search",
+        iconBgColor: "#fa9d3b",
+        path: "/contact/search",
       },
       {
-        name: '新的朋友',
-        icon: 'icon-plane',
-        iconBgColor: '#08bf61',
-        path: '/contact/contactNotice',
+        name: "新的朋友",
+        icon: "icon-plane",
+        iconBgColor: "#08bf61",
+        path: "/contact/contactNotice",
         showTitle: true,
-        countKey: 'contactApplyCount'
-      }
-    ]
+        countKey: "contactApplyCount",
+      },
+    ],
   },
   {
-    partName: '我的群聊',
+    partName: "我的群聊",
     children: [
       {
-        name: '新建群聊',
-        icon: 'icon-add-group',
-        iconBgColor: '#1485ee',
-        path: '/contact/createGroup'
-      }
+        name: "新建群聊",
+        icon: "icon-add-group",
+        iconBgColor: "#1485ee",
+        path: "/contact/createGroup",
+      },
     ],
-    contactId: 'groupId',
-    contactName: 'groupName',
+    contactId: "groupId",
+    contactName: "groupName",
     showTitle: true,
     contactData: [],
-    contactPath: '/contact/groupDetail'
+    contactPath: "/contact/groupDetail",
   },
   {
-    partName: '我加入的群聊',
-    contactId: 'contactId',
-    contactName: 'contactName',
+    partName: "我加入的群聊",
+    contactId: "contactId",
+    contactName: "contactName",
     showTitle: true,
     contactData: [],
-    contactPath: '/contact/groupDetail',
-    emptyMsg: '暂未加入群聊'
+    contactPath: "/contact/groupDetail",
+    emptyMsg: "暂未加入群聊",
   },
   {
-    partName: '我的好友',
+    partName: "我的好友",
     children: [],
-    contactId: 'contactId',
-    contactName: 'contactName',
+    contactId: "contactId",
+    contactName: "contactName",
     contactData: [],
-    contactPath: '/contact/userDetail',
-    emptyMsg: '暂无好友'
-  }
-])
+    contactPath: "/contact/userDetail",
+    emptyMsg: "暂无好友",
+  },
+]);
 
 // 右侧标题
-const rightTitle = ref('')
+const rightTitle = ref("");
 
 // 部分跳转函数
 const partJump = (data) => {
   if (data.showTitle) {
-    rightTitle.value = data.name
+    rightTitle.value = data.name;
   } else {
-    rightTitle.value = null
+    rightTitle.value = null;
   }
   // 处理消息已读
-  router.push(data.path).catch((err) => {
-    console.error('Navigation error:', err)
-  })
-}
+  router.push(data.path);
+};
+const loadContact = async (contactType) => {
+  let result = await proxy.Request({
+    url: proxy.Api.loadContact,
+    params: {
+      contactType,
+    },
+  });
+  if (!result) {
+    return;
+  }
+  if (contactType == "GROUP") {
+    partList.value[2].contactData = result.data;
+  } else if (contactType == "USER") {
+    partList.value[3].contactData = result.data;
+    console.log(partList.value[3].contactData);
+  }
+};
+loadContact("GROUP");
+loadContact("USER");
+onMounted(() => {});
+const contactDetail = (contact, item) => {};
+//loadContact("GROUP");
 </script>
 
 <template>
@@ -97,7 +117,13 @@ const partJump = (data) => {
       <div class="drag-panel drag"></div>
       <!-- 搜索框 -->
       <div class="top-search">
-        <el-input clearable placeholder="搜索内容" v-model="searchKey" size="small" @keyup="search">
+        <el-input
+          clearable
+          placeholder="搜索内容"
+          v-model="searchKey"
+          size="small"
+          @keyup="search"
+        >
           <template #suffix>
             <span class="iconfont icon-search"></span>
           </template>
@@ -106,21 +132,40 @@ const partJump = (data) => {
       <!-- 联系人列表 -->
       <div class="contact-list">
         <template v-for="item in partList">
-          <div class="part-title">{{ item.partName }}</div>
-          <div class="part-list">
-            <div
-              v-for="sub in item.children"
-              :class="['part-item', sub.path == route.path ? 'active' : '']"
-              @click="partJump(sub)"
-            >
-              <div :class="['iconfont', sub.icon]" :style="{ background: sub.iconBgColor }"></div>
-              <div class="text">{{ sub.name }}</div>
+          <div>
+            <div class="part-title">{{ item.partName }}</div>
+            <div class="part-list">
+              <div
+                v-for="sub in item.children"
+                :class="['part-item', sub.path == route.path ? 'active' : '']"
+                @click="partJump(sub)"
+              >
+                <div
+                  :class="['iconfont', sub.icon]"
+                  :style="{ background: sub.iconBgColor }"
+                ></div>
+                <div class="text">{{ sub.name }}</div>
+              </div>
+              <template v-for="contact in item.contactData"> </template>
+              <!-- 从接口获取数据 -->
+              <div
+                :class="[
+                  'part-item',
+                  contact[item.contactId] == route.query.contactId
+                    ? 'active'
+                    : '',
+                ]"
+                @click="contactDetail(contact, item)"
+              >
+                <Avatar :userId="contact[item.contactId]" :width="35"></Avatar>
+                <div class="text">{{ contact[item.contactName] }}</div>
+              </div>
+
+              <!--  -->
+              <template v-if="item.contactData && item.contactData.length == 0">
+                <div class="no-data">{{ item.emptyMsg }}</div>
+              </template>
             </div>
-            <!-- 从接口获取数据 -->
-            <template v-for="contact in item.contactData"> </template>
-            <template v-if="item.contactData && item.contactData.length == 0">
-              <div class="no-data">{{ item.emptyMsg }}</div>
-            </template>
           </div>
         </template>
       </div>
