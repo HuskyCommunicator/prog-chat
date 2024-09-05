@@ -19,6 +19,7 @@ import WinOp from "@/components/WinOp.vue";
 import ContentPanel from "@/components/ContentPanel.vue";
 import Avatar from "@/components/Avatar.vue";
 import AvatarBase from "@/components/AvatarBase.vue";
+import AvatarUpload from "@/components/AvatarUpload.vue";
 const app = createApp(App);
 
 app.use(ElementPlus);
@@ -31,6 +32,7 @@ app.component("ShowLocalImage", ShowLocalImage);
 app.component("ContentPanel", ContentPanel);
 app.component("Avatar", Avatar);
 app.component("AvatarBase", AvatarBase);
+app.component("AvatarUpload", AvatarUpload);
 app.config.globalProperties.Utils = utils;
 app.config.globalProperties.Verify = verify;
 app.config.globalProperties.Request = request;

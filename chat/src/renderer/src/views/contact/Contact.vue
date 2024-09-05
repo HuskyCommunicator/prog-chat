@@ -108,7 +108,17 @@ onMounted(() => {
   loadContact("GROUP");
   loadContact("USER");
 });
-
+const loadMyGroup = async () => {
+  let result = await proxy.Request({
+    url: proxy.Api.loadMyGroup,
+    showLoading: false,
+  });
+  if (!result) {
+    return;
+  }
+  partList.value[1].contactData = result.data;
+};
+loadMyGroup();
 const contactDetail = (contact, item) => {};
 watch(
   () => contactStateStore.contactReload,
@@ -120,6 +130,9 @@ watch(
       case "USER":
       case "GROUP":
         loadContact(newVal);
+        break;
+      case "MY":
+        loadMyGroup();
         break;
     }
   },

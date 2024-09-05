@@ -9,6 +9,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     Avatar: typeof import('./src/components/Avatar.vue')['default']
     AvatarBase: typeof import('./src/components/AvatarBase.vue')['default']
+    AvatarUpload: typeof import('./src/components/AvatarUpload.vue')['default']
     Blank: typeof import('./src/components/Blank.vue')['default']
     ContentPage: typeof import('./src/components/ContentPage.vue')['default']
     ContentPanel: typeof import('./src/components/ContentPanel.vue')['default']
@@ -20,6 +21,9 @@ declare module 'vue' {
     ElImage: typeof import('element-plus/es')['ElImage']
     ElInput: typeof import('element-plus/es')['ElInput']
     ElPopover: typeof import('element-plus/es')['ElPopover']
+    ElRadio: typeof import('element-plus/es')['ElRadio']
+    ElRadioGroup: typeof import('element-plus/es')['ElRadioGroup']
+    ElUpload: typeof import('element-plus/es')['ElUpload']
     Layout: typeof import('./src/components/Layout.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
