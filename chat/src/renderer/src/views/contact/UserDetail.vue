@@ -3,13 +3,21 @@ import { ref, reactive, getCurrentInstance, nextTick, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import UserBaseInfo from '@/components/UserBaseInfo.vue'
 import { useContactStateStore } from '@/stores/ContactStateStore'
+
+// 初始化联系状态存储
 const contactStateStore = useContactStateStore()
+
+// 获取路由和路由器实例
 const route = useRoute()
 const router = useRouter()
+
+// 获取当前实例代理
 const { proxy } = getCurrentInstance()
 
+// 初始化用户信息
 const userInfo = ref({})
 
+// 加载用户详细信息函数
 const loadUserDetail = async (contactId) => {
   let result = await proxy.Request({
     url: proxy.Api.getContactUserInfo,
@@ -20,6 +28,7 @@ const loadUserDetail = async (contactId) => {
   }
 }
 
+// 监听路由参数变化，加载用户详细信息
 watch(
   () => route.query.contactId,
   (newVal, oldVal) => {
@@ -29,7 +38,8 @@ watch(
   },
   { immediate: true, deep: true }
 )
-//加入黑名单
+
+// 加入黑名单函数
 const addContact2BlackList = () => {
   proxy.Confirm({
     message: '确认添加到黑名单？',
@@ -47,11 +57,14 @@ const addContact2BlackList = () => {
     }
   })
 }
+
+// 删除联系人数据函数
 const delContactData = () => {
   contactStateStore.setContactReload('REMOVE_USER')
   contactStateStore.delContactId(userInfo.value.userId)
 }
-//删除用户
+
+// 删除联系人函数
 const delContact = () => {
   proxy.Confirm({
     message: '确认删除该联系人？',

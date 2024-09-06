@@ -1,127 +1,99 @@
 <script setup>
 // 从 'vue' 导入必要的函数和对象
-import { ref, computed, getCurrentInstance } from "vue";
+import { ref, computed, getCurrentInstance } from 'vue'
 
 // 导入用户信息存储
-import { useUserInfoStore } from "@/stores/UserInfoStore";
-import UserBaseInfo from "../../components/UserBaseInfo.vue";
-import SearchAdd from "./SearchAdd.vue";
+import { useUserInfoStore } from '@/stores/UserInfoStore'
+import UserBaseInfo from '../../components/UserBaseInfo.vue'
+import SearchAdd from './SearchAdd.vue'
 
 // 初始化用户信息存储
-const userInfoStore = useUserInfoStore();
+const userInfoStore = useUserInfoStore()
 
 // 获取当前实例代理
-const { proxy } = getCurrentInstance();
+const { proxy } = getCurrentInstance()
 
 // 将联系人ID和搜索结果初始化为响应式引用
-const contactId = ref("U85365553083");
-const searchResult = ref([]);
+const contactId = ref('U85365553083')
+const searchResult = ref([])
 
 // 定义一个计算属性来确定内容类型名称
 const contentTypeName = computed(() => {
   if (userInfoStore.getInfo().userId == searchResult.value.contactId) {
-    return "自己"; // '自己'
-  } else if (searchResult.value.contactType == "USER") {
-    return "用户"; // '用户'
-  } else if (searchResult.value.contactType == "GROUP") {
-    return "群组"; // '群组'
+    return '自己' // '自己'
+  } else if (searchResult.value.contactType == 'USER') {
+    return '用户' // '用户'
+  } else if (searchResult.value.contactType == 'GROUP') {
+    return '群组' // '群组'
   }
-});
+})
 
 // 定义搜索函数
 const search = async () => {
   // 检查是否输入了联系人ID
   if (!contactId.value) {
-    proxy.Message.warning("请输入用户id或群组id"); // '请输入用户id或群组id'
-    return;
+    proxy.Message.warning('请输入用户id或群组id') // '请输入用户id或群组id'
+    return
   }
 
   // 向搜索API发出请求
   let result = await proxy.Request({
     url: proxy.Api.search,
-    params: { contactId: contactId.value },
-  });
+    params: { contactId: contactId.value }
+  })
 
   // 如果没有结果，返回
   if (!result) {
-    return;
+    return
   }
 
   // 更新搜索结果
-  searchResult.value = result.data;
-};
+  searchResult.value = result.data
+}
 
 // 定义应用联系人函数
-const searchAddRef = ref("");
+const searchAddRef = ref('')
 const applyContact = () => {
-  if (searchAddRef.value && typeof searchAddRef.value.show === "function") {
-    searchAddRef.value.show(searchResult.value);
+  if (searchAddRef.value && typeof searchAddRef.value.show === 'function') {
+    searchAddRef.value.show(searchResult.value)
   } else {
-    console.error(
-      "searchAddRef is not properly initialized or show method is not defined",
-    );
+    console.error('searchAddRef is not properly initialized or show method is not defined')
   }
-};
+}
+
+// 重置表单函数
 const resetFrom = () => {
-  searchResult.value = [];
-  contactId.value = undefined;
-};
-const sendMessage = () => {};
+  searchResult.value = []
+  contactId.value = undefined
+}
+
+// 发送消息函数（占位）
+const sendMessage = () => {}
 </script>
 
 <template>
   <ContentPanel>
     <!-- 搜索框 -->
     <div class="search-form">
-      <el-input
-        clearable
-        placeholder="请输入用户id或群组id"
-        v-model="contactId"
-        size="large"
-        @keyDown.enter="search"
-      ></el-input>
+      <el-input clearable placeholder="请输入用户id或群组id" v-model="contactId" size="large" @keyDown.enter="search"></el-input>
       <div class="search-btn iconfont icon-search" @click="search"></div>
     </div>
     <!-- 搜索结果 -->
-    <div
-      v-if="searchResult && Object.keys(searchResult).length > 0"
-      class="search-result-panel"
-    >
+    <div v-if="searchResult && Object.keys(searchResult).length > 0" class="search-result-panel">
       <!-- 展示结果 -->
       <div class="search-result">
         <span class="contact-type">{{ contentTypeName }}</span>
-        <UserBaseInfo
-          :userInfo="searchResult"
-          :showArea="searchResult.contactType == 'USER'"
-        ></UserBaseInfo>
+        <UserBaseInfo :userInfo="searchResult" :showArea="searchResult.contactType == 'USER'"></UserBaseInfo>
       </div>
-      <div
-        class="op-btn"
-        v-if="searchResult.contactId != userInfoStore.getInfo().userId"
-      >
+      <div class="op-btn" v-if="searchResult.contactId != userInfoStore.getInfo().userId">
         <el-button
           type="primary"
           @click="applyContact"
-          v-if="
-            searchResult.status == null ||
-            searchResult.status == 0 ||
-            searchResult.status == 2 ||
-            searchResult.status == 3 ||
-            searchResult.status == 4
-          "
-          >{{
-            searchResult.contactType == "USER" ? "添加到联系人" : "申请加入群组"
-          }}</el-button
+          v-if="searchResult.status == null || searchResult.status == 0 || searchResult.status == 2 || searchResult.status == 3 || searchResult.status == 4"
+          >{{ searchResult.contactType == 'USER' ? '添加到联系人' : '申请加入群组' }}</el-button
         >
-        <el-button
-          type="primary"
-          v-if="searchResult.status == 1"
-          @click="sendMessage"
-          >发消息</el-button
-        >
-        <span v-if="searchResult.status == 5 || searchResult.status == 6"
-          >对方拉黑了你</span
-        >
+        <el-button type="primary" v-if="searchResult.status == 1" @click="sendMessage">发消息</el-button>
+        <span v-if="searchResult.status == 5 || searchResult.status == 6">对方拉黑了你</span>
       </div>
     </div>
     <!-- 结果为空 -->

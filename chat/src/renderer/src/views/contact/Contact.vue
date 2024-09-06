@@ -4,9 +4,11 @@ import Layout from '../../components/Layout.vue'
 import { useRoute, useRouter } from 'vue-router'
 import Avatar from '../../components/Avatar.vue'
 import { useContactStateStore } from '../../stores/ContactStateStore'
+
 // 获取当前实例
 const { proxy } = getCurrentInstance()
 const contactStateStore = useContactStateStore()
+
 // 路由相关
 const route = useRoute()
 const router = useRouter()
@@ -87,6 +89,8 @@ const partJump = (data) => {
   // 处理消息已读
   router.push(data.path)
 }
+
+// 加载联系人数据
 const loadContact = async (contactType) => {
   let result = await proxy.Request({
     url: proxy.Api.loadContact,
@@ -104,10 +108,7 @@ const loadContact = async (contactType) => {
   }
 }
 
-onMounted(() => {
-  loadContact('GROUP')
-  loadContact('USER')
-})
+// 加载我的群聊数据
 const loadMyGroup = async () => {
   let result = await proxy.Request({
     url: proxy.Api.loadMyGroup,
@@ -118,7 +119,8 @@ const loadMyGroup = async () => {
   }
   partList.value[1].contactData = result.data
 }
-loadMyGroup()
+
+// 联系人详情跳转
 const contactDetail = (contact, part) => {
   if (part.showTile) {
     rightTitle.value = contact[part.contactName]
@@ -130,6 +132,8 @@ const contactDetail = (contact, part) => {
     query: { contactId: contact[part.contactId] }
   })
 }
+
+// 监听联系人状态变化
 watch(
   () => contactStateStore.contactReload,
   (newVal, oldVal) => {
@@ -149,10 +153,26 @@ watch(
         router.push('/contact/blank')
         rightTitle.value = null
         break
+      case 'DISSOLUTION_GROUP':
+        loadMyGroup()
+
+        router.push('/contact/blank')
+        rightTitle.value = null
+        break
+      case 'LEAVE_GROUP':
+        loadContact('GROUP')
+        router.push('/contact/blank')
+        rightTitle.value = null
+        break
     }
-  },
-  {}
+  }
 )
+// 组件挂载时加载联系人数据
+onMounted(() => {
+  loadContact('GROUP')
+  loadContact('USER')
+  loadMyGroup()
+})
 </script>
 
 <template>
