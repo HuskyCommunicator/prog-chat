@@ -58,7 +58,7 @@ const router = createRouter({
             {
               path: '/contact/contactNotice',
               name: '新的朋友',
-              component: () => import('@/views/contact/contactNotice.vue')
+              component: () => import('@/views/contact/ContactApply.vue')
             }
           ]
         },

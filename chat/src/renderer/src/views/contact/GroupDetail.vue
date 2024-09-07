@@ -1,8 +1,8 @@
 <script setup>
 import { ref, reactive, getCurrentInstance, nextTick, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useUserInfoStore } from '@/stores/UserInfoStore'
 import GroupEditDialog from './GroupEditDialog.vue'
+import { useUserInfoStore } from '@/stores/UserInfoStore'
 import { useContactStateStore } from '@/stores/ContactStateStore'
 
 // 获取用户信息存储

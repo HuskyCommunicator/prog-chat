@@ -3,15 +3,10 @@ export const useContactStateStore = defineStore('ContactStateInfo', {
   state: () => {
     return {
       contactReload: null,
-      delContactId: null,
-      data: null
+      delContactId: null
     }
   },
   actions: {
-    setData(data) {
-      this.data = data
-      localStorage.setItem('group', JSON.stringify(data))
-    },
     setContactReload(state) {
       this.contactReload = state
     },

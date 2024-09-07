@@ -34,4 +34,7 @@ declare module 'vue' {
     UserBaseInfo: typeof import('./src/components/UserBaseInfo.vue')['default']
     WinOp: typeof import('./src/components/WinOp.vue')['default']
   }
+  export interface ComponentCustomProperties {
+    vInfiniteScroll: typeof import('element-plus/es')['ElInfiniteScroll']
+  }
 }
