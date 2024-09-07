@@ -4,7 +4,6 @@ import Layout from '../../components/Layout.vue'
 import { useRoute, useRouter } from 'vue-router'
 import Avatar from '../../components/Avatar.vue'
 import { useContactStateStore } from '../../stores/ContactStateStore'
-
 // 获取当前实例
 const { proxy } = getCurrentInstance()
 const contactStateStore = useContactStateStore()

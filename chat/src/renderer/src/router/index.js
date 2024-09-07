@@ -70,7 +70,7 @@ const router = createRouter({
           children: [
             {
               path: '/setting/userInfo',
-              name: '新的朋友',
+              name: '账号设置',
               component: () => import('@/views/setting/UserInfo.vue')
             },
             {

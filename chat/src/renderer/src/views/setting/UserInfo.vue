@@ -1,6 +1,7 @@
 <script setup>
 import { ref, reactive, getCurrentInstance, nextTick, onMounted } from 'vue'
 import UserInfoEdit from './UserInfoEdit.vue'
+import UserInfoPassword from './UserInfoPassword.vue'
 const { proxy } = getCurrentInstance()
 const userInfo = ref({})
 const getUserInfo = async () => {
@@ -66,6 +67,9 @@ onMounted(getUserInfo)
       <UserInfoEdit :data="userInfo" @editBack="editBack"></UserInfoEdit>
     </div>
     <!--  -->
+    <div v-if="showType == 2">
+      <UserInfoPassword @editBack="editBack"></UserInfoPassword>
+    </div>
   </ContentPanel>
 </template>
 
