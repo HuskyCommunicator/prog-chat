@@ -4,7 +4,7 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { onLoginOrRegister, onLoginSuccess, winTitleOp, onSetLocalStore, onGetLocalStore } from './ipc.js'
-
+import './wsClient.js'
 const NODE_ENV = process.env.NODE_ENV
 const login_width = 300
 const login_height = 370

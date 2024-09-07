@@ -1,5 +1,6 @@
 import store from './store.js'
 import { ipcMain } from 'electron'
+import { initWs } from './wsClient.js'
 export const onLoginOrRegister = (callback) => {
   ipcMain.on('loginOrRegister', (e, isLogin) => {
     callback(isLogin)
@@ -10,7 +11,7 @@ export const onLoginSuccess = (callback) => {
     store.initUserId(config.userId), store.setUserData('token', config.token)
     //用户配置
     callback(config)
-    //初始化ws链接
+    initWs(config, e.sender)
   })
 }
 export const onSetLocalStore = () => {
