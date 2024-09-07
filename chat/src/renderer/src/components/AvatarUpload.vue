@@ -1,16 +1,20 @@
 <script setup>
-import { ref, reactive, getCurrentInstance, nextTick } from "vue";
-const { proxy } = getCurrentInstance();
+import { ref, reactive, getCurrentInstance, nextTick, computed } from 'vue'
+const { proxy } = getCurrentInstance()
 const props = defineProps({
   modelValue: {
     type: [String, Object],
-    default: null,
-  },
-});
+    default: null
+  }
+})
 const uploadImage = async (file) => {
-  file = file.file;
+  file = file.file
   // window.ipcRenderer.send("")
-};
+}
+const preview = computed(() => {
+  return props.modelValue instanceof File
+})
+//TODO 文件上传
 </script>
 
 <template>
@@ -18,12 +22,7 @@ const uploadImage = async (file) => {
     <div class="avatar-show">
       <template v-if="modelValue">
         <el-image v-if="preview" :src="localFile" fit="scale-down"></el-image>
-        <ShowLocalImage
-          :fileId="modelValue"
-          partType="avatar"
-          :width="40"
-          v-else
-        ></ShowLocalImage>
+        <ShowLocalImage :fileId="modelValue" partType="avatar" :width="40" v-else></ShowLocalImage>
       </template>
       <template v-else>
         <el-upload

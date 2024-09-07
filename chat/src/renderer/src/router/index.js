@@ -65,7 +65,25 @@ const router = createRouter({
         {
           path: '/setting',
           name: '设置页面',
-          component: () => import('@/views/setting/Setting.vue')
+          redirect: '/setting/userInfo',
+          component: () => import('@/views/setting/Setting.vue'),
+          children: [
+            {
+              path: '/setting/userInfo',
+              name: '新的朋友',
+              component: () => import('@/views/setting/UserInfo.vue')
+            },
+            {
+              path: '/setting/fileManage',
+              name: '文件管理',
+              component: () => import('@/views/setting/FileManage.vue')
+            },
+            {
+              path: '/setting/about',
+              name: '关于easyChat',
+              component: () => import('@/views/setting/About.vue')
+            }
+          ]
         }
       ]
     }
