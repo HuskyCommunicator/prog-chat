@@ -42,7 +42,7 @@ const createWs = () => {
 
   // 从服务端接收到消息的回调函数
   ws.onmessage = async (e) => {
-    console.log('收到服务器消息', e.data)
+    //   console.log('收到服务器消息', e.data)
     sender.send('receiveMessage', e.data)
   }
 
