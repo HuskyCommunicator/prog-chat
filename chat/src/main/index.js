@@ -12,7 +12,7 @@ const login_height = 370
 const register_height = 490
 // 创建窗口的函数
 function createWindow() {
-  console.time('startup-time') // 开始计时
+  console.time('启动耗时') // 开始计时
   // 创建一个新的浏览器窗口
   const mainWindow = new BrowserWindow({
     icon: icon,
@@ -36,9 +36,8 @@ function createWindow() {
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
     mainWindow.setTitle('Chat')
-    console.timeEnd('startup-time') // 结束计时并输出时间
   })
-
+  console.timeEnd('启动耗时') // 结束计时并输出时间
   // 设置窗口打开处理器
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)

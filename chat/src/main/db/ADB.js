@@ -178,6 +178,43 @@ const insert = (sqlPrefix, tableName, data) => {
   const sql = `${sqlPrefix} ${tableName} (${dbColumns.join(',')}) VALUES (${prepare})`
   return run(sql, params)
 }
+// 插入或覆盖数据到表中
+const insertOrReplace = (tableName, data) => {
+  return insert('INSERT OR REPLACE INTO', tableName, data)
+}
+// 插入数据到表中，如果数据已存在，则忽略
+const insertIgnore = (tableName, data) => {
+  return insert('INSERT OR IGNORE INTO', tableName, data)
+}
+// 更新数据
+const update = (tableName, data, paramData) => {
+  const columnsMap = globalColumnsMap[tableName]
+  const dbColumns = []
+  const params = []
+  const whereColumns = []
+
+  for (let item in data) {
+    if (data[item] !== undefined && columnsMap[item] !== null) {
+      dbColumns.push(`${columnsMap[item]} = ?`)
+      params.push(data[item])
+    }
+  }
+
+  for (let item in data) {
+    if (paramData[item]) {
+      params.push(paramData[item])
+      whereColumns.push(`${columnsMap[item]} = ?`)
+    }
+  }
+
+  const sql = `UPDATE ${tableName} SET ${dbColumns.join(',')} ${whereColumns.length > 0 ? 'WHERE ' : ''}${whereColumns.join(' AND ')}`
+  return run(sql, params)
+}
+
+const deleteData = (tableName, where) => {
+  const sql = `DELETE FROM ${tableName} WHERE ${where}`
+  return run(sql, [])
+}
 
 // 初始化函数，串行化执行创建表和初始化列信息映射
 const init = () => {
@@ -189,4 +226,4 @@ const init = () => {
 init()
 
 // 导出 createTable 函数
-export { createTable }
+export { run, queryAll, queryOne, queryCount, insert, insertOrReplace, insertIgnore, update, deleteData }

@@ -37,21 +37,34 @@ const globalColumnsMap = {
   }
 }
 
-const insert = (sqlPrefix, tableName, data) => {
+const update = (tableName, data, paramData) => {
   const columnsMap = globalColumnsMap[tableName]
   const dbColumns = []
   const params = []
+  const whereColumns = []
+
   for (let item in data) {
     if (data[item] !== undefined && columnsMap[item] !== null) {
-      dbColumns.push(columnsMap[item])
+      dbColumns.push(`${columnsMap[item]} = ?`)
       params.push(data[item])
     }
   }
-  const prepare = '?'.repeat(dbColumns.length).split('').join(',')
-  const sql = `${sqlPrefix} ${tableName} (${dbColumns.join(',')}) VALUES (${prepare})`
+
+  for (let item in data) {
+    if (paramData[item]) {
+      params.push(paramData[item])
+      whereColumns.push(`${columnsMap[item]} = ?`)
+    }
+  }
+
+  const sql = `UPDATE ${tableName} SET ${dbColumns.join(',')} ${whereColumns.length > 0 ? 'WHERE ' : ''}${whereColumns.join(' AND ')}`
   console.log(sql)
 }
-insert('insert', 'chat_message', {
-  userId: 1,
-  messageId: 1
-})
+update(
+  'chat_message',
+  {
+    userId: 1,
+    messageId: 1
+  },
+  { userId: 1, messageId: 1 }
+)
