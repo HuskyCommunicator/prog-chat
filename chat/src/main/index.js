@@ -5,13 +5,14 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { onLoginOrRegister, onLoginSuccess, winTitleOp, onSetLocalStore, onGetLocalStore } from './ipc.js'
 import './wsClient.js'
+import { createTable } from './db/ADB.js'
 const NODE_ENV = process.env.NODE_ENV
 const login_width = 300
 const login_height = 370
 const register_height = 490
-
 // 创建窗口的函数
 function createWindow() {
+  console.time('startup-time') // 开始计时
   // 创建一个新的浏览器窗口
   const mainWindow = new BrowserWindow({
     icon: icon,
@@ -23,7 +24,6 @@ function createWindow() {
     frame: true,
     transparent: true,
     titleBarStyle: 'hidden',
-
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
@@ -36,6 +36,7 @@ function createWindow() {
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
     mainWindow.setTitle('Chat')
+    console.timeEnd('startup-time') // 结束计时并输出时间
   })
 
   // 设置窗口打开处理器
