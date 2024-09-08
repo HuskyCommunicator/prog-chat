@@ -1,6 +1,6 @@
 import { WebSocket } from 'ws'
 import store from './store'
-
+import { saveOrUpdateChatSessionBatch4Init } from './db/ChatSessionUserModel'
 const NODE_ENV = process.env.NODE_ENV
 let ws = null
 let maxReConnectTimes = null
@@ -42,8 +42,16 @@ const createWs = () => {
 
   // 从服务端接收到消息的回调函数
   ws.onmessage = async (e) => {
-    //   console.log('收到服务器消息', e.data)
+    //console.log('收到服务器消息', e.data)
     sender.send('receiveMessage', e.data)
+    const message = JSON.parse(e.data)
+    const messageType = message.messageType
+    switch (messageType) {
+      case 0:
+        await saveOrUpdateChatSessionBatch4Init(message.extendData.chatSessionList)
+        //  sender.send('')
+        break
+    }
   }
 
   // WebSocket 连接关闭的回调函数

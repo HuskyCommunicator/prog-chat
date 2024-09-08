@@ -115,6 +115,7 @@ const queryOne = (sql, params) => {
         resolve({})
       }
       resolve(convertDbObj2BizObj(row))
+      console.log(`执行的SQL语句为sql:${sql},params:${params}，row:${JSON.stringify(row)}`)
     })
     stmt.finalize((finalizeErr) => {
       if (finalizeErr) {
@@ -148,11 +149,10 @@ const run = (sql, params) => {
     const stmt = db.prepare(sql)
     stmt.run(params, (err, row) => {
       if (err) {
+        console.log(`执行的SQL语句为sql:${sql},params:${params},row:${JSON.stringify(row)}`)
         resolve('操作数据库失败')
       }
-      row.forEach((item, index) => {
-        row[index] = convertDbObj2BizObj(item)
-      })
+      console.log(`执行的SQL语句为sql:${sql},params:${params},执行记录数:${this.changes},rows:${row}`)
       resolve(this.changes)
     })
     stmt.finalize((finalizeErr) => {
@@ -178,14 +178,17 @@ const insert = (sqlPrefix, tableName, data) => {
   const sql = `${sqlPrefix} ${tableName} (${dbColumns.join(',')}) VALUES (${prepare})`
   return run(sql, params)
 }
+
 // 插入或覆盖数据到表中
 const insertOrReplace = (tableName, data) => {
   return insert('INSERT OR REPLACE INTO', tableName, data)
 }
+
 // 插入数据到表中，如果数据已存在，则忽略
 const insertIgnore = (tableName, data) => {
   return insert('INSERT OR IGNORE INTO', tableName, data)
 }
+
 // 更新数据
 const update = (tableName, data, paramData) => {
   const columnsMap = globalColumnsMap[tableName]
