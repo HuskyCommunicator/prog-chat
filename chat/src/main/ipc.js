@@ -1,7 +1,7 @@
 import store from './store.js'
 import { ipcMain } from 'electron'
 import { initWs } from './wsClient.js'
-
+import { addUserSetting } from './db/UserSettingModel.js'
 // 处理登录或注册事件
 export const onLoginOrRegister = (callback) => {
   ipcMain.on('loginOrRegister', (e, isLogin) => {
@@ -16,6 +16,7 @@ export const onLoginSuccess = (callback) => {
     store.initUserId(config.userId)
     store.setUserData('token', config.token)
     // 用户配置
+    addUserSetting(config.userId, config.email)
     callback(config)
     // 初始化WebSocket连接
     initWs(config, e.sender)

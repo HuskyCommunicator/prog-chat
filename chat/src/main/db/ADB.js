@@ -58,6 +58,7 @@ const initTableColumnsMap = async () => {
     let columns = await queryAll(sql, [])
     const columnsMapItem = {}
     for (let j = 0; j < columns.length; j++) {
+      //TO ASK
       const column = columns[j]
       columnsMapItem[toCamelCase(columns[j].name)] = columns[j].name
     }

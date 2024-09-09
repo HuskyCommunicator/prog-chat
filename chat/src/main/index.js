@@ -9,7 +9,7 @@ import { createTable } from './db/ADB.js'
 const NODE_ENV = process.env.NODE_ENV
 const login_width = 300
 const login_height = 370
-const register_height = 490
+const register_height = 500
 // 创建窗口的函数
 function createWindow() {
   console.time('启动耗时') // 开始计时
@@ -78,10 +78,11 @@ function createWindow() {
   //监听登陆注册
   onLoginOrRegister((isLogin) => {
     mainWindow.resizable = true
+    console.log(isLogin)
     if (isLogin) {
-      mainWindow.setSize(login_width, login_height)
-    } else {
       mainWindow.setSize(login_width, register_height)
+    } else {
+      mainWindow.setSize(login_width, login_height)
     }
     mainWindow.resizable = false
   })
