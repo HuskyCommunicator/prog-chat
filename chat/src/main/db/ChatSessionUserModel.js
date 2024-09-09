@@ -24,28 +24,36 @@ const updateChatSession = (sessionInfo) => {
   updateInfo.contactId = null
   return update('chat_session_user', updateInfo, paramData)
 }
-
 // 批量保存或更新聊天会话
 const saveOrUpdateChatSessionBatch4Init = (chatSessionList) => {
   return new Promise(async (resolve, reject) => {
     try {
+      // 遍历聊天会话列表
       for (let i = 0; i < chatSessionList.length; i++) {
-        const sessionInfo = chatSessionList[i]
-        sessionInfo.status = 1
+        const sessionInfo = chatSessionList[i] // 获取当前会话信息
+        sessionInfo.status = 1 // 设置会话状态为1
+
+        // 根据联系人ID查询用户会话
         let sessionData = await selectUserSessionByContactId(sessionInfo.contactId)
+
         if (sessionData) {
-          // 如果会话存在，则更新
-          await updateChatSession(sessionInfo)
+          // 如果会话存在，递归调用函数更新会话信息
+          await saveOrUpdateChatSessionBatch4Init(sessionInfo)
         } else {
-          // 如果会话不存在，则新增
+          // 如果会话不存在，添加新的会话
           await addChatSession(sessionInfo)
         }
       }
-      resolve()
-    } catch (error) {
-      reject(error)
+      resolve() // 完成后解析Promise
+    } catch (err) {
+      reject(err) // 捕获错误并拒绝Promise
     }
   })
 }
+//更新未读数
+const updateNoReadCount = ({ contactId, noReadCount }) => {
+  const sql = 'UPDATE chat_session_user SET no_read_count = no_read_count+? WHERE user_id = ? AND contact_id = ?'
+  return run(sql, [noReadCount, store.getUserId(), contactId])
+}
 
-export { saveOrUpdateChatSessionBatch4Init }
+export { saveOrUpdateChatSessionBatch4Init, updateNoReadCount, updateChatSession }

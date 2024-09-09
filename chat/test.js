@@ -58,7 +58,6 @@ const update = (tableName, data, paramData) => {
   }
 
   const sql = `UPDATE ${tableName} SET ${dbColumns.join(',')} ${whereColumns.length > 0 ? 'WHERE ' : ''}${whereColumns.join(' AND ')}`
-  console.log(sql)
 }
 update(
   'chat_message',

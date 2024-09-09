@@ -1,6 +1,8 @@
 import { WebSocket } from 'ws'
 import store from './store'
 import { saveOrUpdateChatSessionBatch4Init } from './db/ChatSessionUserModel'
+import { saveMessageBatch } from './db/ChatMessageModel'
+import { updateContactNoReadCount } from './db/UserSettingModel'
 const NODE_ENV = process.env.NODE_ENV
 let ws = null
 let maxReConnectTimes = null
@@ -42,14 +44,19 @@ const createWs = () => {
 
   // 从服务端接收到消息的回调函数
   ws.onmessage = async (e) => {
-    //console.log('收到服务器消息', e.data)
+    //  console.log('收到服务器消息', e.data)
     sender.send('receiveMessage', e.data)
     const message = JSON.parse(e.data)
     const messageType = message.messageType
     switch (messageType) {
-      case 0:
+      case 0: //ws链接成功
+        //保存会话消息
         await saveOrUpdateChatSessionBatch4Init(message.extendData.chatSessionList)
         //  sender.send('')
+        //保存消息
+        await saveMessageBatch(message.extendData.chatMessageList)
+        //更新未读消息
+        await updateContactNoReadCount({ userId: store.getUserId(), noReadCount: message.extendData.applyCount })
         break
     }
   }
@@ -95,7 +102,7 @@ const createWs = () => {
   // 定时发送心跳包
   setInterval(() => {
     if (ws != null && ws.readyState === 1) {
-      //  console.log('发送心跳')
+      //console.log('发送心跳')
       ws.send('heart beat')
     }
   }, 3000)

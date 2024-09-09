@@ -115,7 +115,7 @@ const queryOne = (sql, params) => {
         resolve({})
       }
       resolve(convertDbObj2BizObj(row))
-      console.log(`执行的SQL语句为sql:${sql},params:${params}，row:${JSON.stringify(row)}`)
+      //  console.log(`执行的SQL语句为sql:${sql},params:${params}，row:${JSON.stringify(row)}`)
     })
     stmt.finalize((finalizeErr) => {
       if (finalizeErr) {
@@ -149,10 +149,12 @@ const run = (sql, params) => {
     const stmt = db.prepare(sql)
     stmt.run(params, (err, row) => {
       if (err) {
-        console.log(`执行的SQL语句为sql:${sql},params:${params},row:${JSON.stringify(row)}`)
+        console.error('SQL error:', err)
+        //console.log(`执行的SQL语句为sql:${sql},params:${params},row:${JSON.stringify(row)}`)
+
         resolve('操作数据库失败')
       }
-      console.log(`执行的SQL语句为sql:${sql},params:${params},执行记录数:${this.changes},rows:${row}`)
+      // console.log(`执行的SQL语句为sql:${sql},params:${params},执行记录数:${this.changes}`)
       resolve(this.changes)
     })
     stmt.finalize((finalizeErr) => {
@@ -168,13 +170,19 @@ const insert = (sqlPrefix, tableName, data) => {
   const columnsMap = globalColumnsMap[tableName]
   const dbColumns = []
   const params = []
+
   for (let item in data) {
-    if (data[item] !== undefined && columnsMap[item] !== null) {
+    if (data[item] !== undefined && columnsMap[item] !== undefined) {
       dbColumns.push(columnsMap[item])
       params.push(data[item])
     }
   }
-  const prepare = '?'.repeat(dbColumns.length).split('').join(',')
+
+  if (dbColumns.length === 0) {
+    throw new Error('No valid columns found for insertion.')
+  }
+
+  const prepare = dbColumns.map(() => '?').join(',')
   const sql = `${sqlPrefix} ${tableName} (${dbColumns.join(',')}) VALUES (${prepare})`
   return run(sql, params)
 }
@@ -229,4 +237,4 @@ const init = () => {
 init()
 
 // 导出 createTable 函数
-export { run, queryAll, queryOne, queryCount, insert, insertOrReplace, insertIgnore, update, deleteData }
+export { run, queryAll, queryOne, queryCount, insert, insertOrReplace, insertIgnore, update, deleteData, createTable }
