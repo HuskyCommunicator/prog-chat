@@ -37,7 +37,6 @@ const createWs = () => {
 
   // WebSocket 连接成功的回调函数
   ws.onopen = () => {
-    console.log('客户端连接成功')
     ws.send('heart beat')
     maxReConnectTimes = 5
   }
@@ -52,31 +51,29 @@ const createWs = () => {
       case 0: //ws链接成功
         //保存会话消息
         await saveOrUpdateChatSessionBatch4Init(message.extendData.chatSessionList)
-        //  sender.send('')
         //保存消息
         await saveMessageBatch(message.extendData.chatMessageList)
         //更新未读消息
         await updateContactNoReadCount({ userId: store.getUserId(), noReadCount: message.extendData.applyCount })
+        //发送消息
+        sender.send('receiveChatMessage', { messageType: message.messageType })
         break
     }
   }
 
   // WebSocket 连接关闭的回调函数
   ws.onclose = () => {
-    console.log('关闭客户端连接，准备重连')
     reconnect()
   }
 
   // WebSocket 连接错误的回调函数
   ws.onerror = () => {
-    console.log('连接失败，准备重连')
     reconnect()
   }
 
   // 重连函数
   const reconnect = () => {
     if (!needReconnect) {
-      console.log('连接断开，无需重连')
       return
     }
     if (ws !== null) {

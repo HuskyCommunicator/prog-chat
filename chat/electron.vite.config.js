@@ -28,7 +28,9 @@ export default defineConfig({
       })
     ],
     server: {
-      hmr: true,
+      hmr: {
+        overlay: false
+      },
       port: 5173,
       proxy: {
         '/api': {

@@ -56,4 +56,9 @@ const updateNoReadCount = ({ contactId, noReadCount }) => {
   return run(sql, [noReadCount, store.getUserId(), contactId])
 }
 
-export { saveOrUpdateChatSessionBatch4Init, updateNoReadCount, updateChatSession }
+const selectUserSessionList = () => {
+  let sql = 'select * from chat_session_user where user_id= ? and status=1'
+  return queryAll(sql, [store.getUserId()])
+}
+
+export { saveOrUpdateChatSessionBatch4Init, updateNoReadCount, updateChatSession, selectUserSessionList }

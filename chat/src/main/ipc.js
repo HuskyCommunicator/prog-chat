@@ -2,6 +2,7 @@ import store from './store.js'
 import { ipcMain } from 'electron'
 import { initWs } from './wsClient.js'
 import { addUserSetting } from './db/UserSettingModel.js'
+import { selectUserSessionList } from './db/ChatSessionUserModel.js'
 // 处理登录或注册事件
 export const onLoginOrRegister = (callback) => {
   ipcMain.on('loginOrRegister', (e, isLogin) => {
@@ -27,14 +28,13 @@ export const onLoginSuccess = (callback) => {
 export const onSetLocalStore = () => {
   ipcMain.on('setLocalStore', (e, { key, value }) => {
     store.setData(key, value)
-    console.log(store.getData(key))
   })
 }
 
 // 获取本地存储数据
 export const onGetLocalStore = () => {
   ipcMain.on('getLocalStore', (e, key) => {
-    console.log('收到渲染进程的获取事件key', key)
+    // console.log('收到渲染进程的获取事件key', key)
     e.sender.send('getLocalStoreCallBack', '主进程返回的内容:', store.getData(key))
   })
 }
@@ -43,5 +43,13 @@ export const onGetLocalStore = () => {
 export const winTitleOp = (callback) => {
   ipcMain.on('winTitleOp', (e, data) => {
     callback(e, data)
+  })
+}
+
+//
+export const onLoadSessionData = () => {
+  ipcMain.on('loadSessionData', async (e) => {
+    const dataList = await selectUserSessionList()
+    e.sender.send('loadSessionDataCallBack', dataList)
   })
 }

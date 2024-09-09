@@ -60,8 +60,8 @@ const addUserSetting = async (userId, email) => {
   if (userInfo) {
     // 如果用户设置已存在，更新email
     await update('user_setting', { email: email }, { userId: userId })
-    resultServerPort = userInfo.serverPort
-    localFileFolder = JSON.parse(userInfo.sysSetting).localFileFolder + userId
+    resultServerPort = userInfo.server_port
+    localFileFolder = JSON.parse(userInfo.sys_setting).localFileFolder + userId
   } else {
     // 如果用户设置不存在，插入新的记录
     await insertIgnore('user_setting', {

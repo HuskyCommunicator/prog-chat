@@ -1,16 +1,24 @@
 <script setup>
 import { ref, reactive, getCurrentInstance, nextTick, onMounted } from 'vue'
 const { proxy } = getCurrentInstance()
+
 const search = () => {}
 const searchKey = ref('')
-const init = () => {
-  window.ipcRenderer.send('getLocalStore', 'devWsDomain')
-  window.ipcRenderer.on('getLocalStoreCallBack', (e, data) => {
-    console.log(data)
+const chatSessionList = ref([])
+const onReceiveMessage = () => {
+  window.ipcRenderer.on('receiveChatMessage', (e, message) => {})
+}
+const onLoadSessionData = () => {
+  window.ipcRenderer.on('loadSessionDataCallBack', (e, dataList) => {
+    chatSessionList.value = dataList
+    console.log(chatSessionList.value)
   })
 }
+const loadChatSession = () => {
+  window.ipcRenderer.send('loadSessionData')
+}
 onMounted(() => {
-  init()
+  onReceiveMessage(), onLoadSessionData(), loadChatSession()
 })
 </script>
 
@@ -25,7 +33,12 @@ onMounted(() => {
           </template>
         </el-input>
       </div>
+
+      <div v-for="item in chatSessionList">
+        <div>{{ item.contact_name }}</div>
+      </div>
     </template>
+    <template #right-content></template>
   </Layout>
 </template>
 

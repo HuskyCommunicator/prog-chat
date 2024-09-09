@@ -3,13 +3,15 @@ import { app, shell, BrowserWindow, ipcMain, Menu, Tray } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { onLoginOrRegister, onLoginSuccess, winTitleOp, onSetLocalStore, onGetLocalStore } from './ipc.js'
+import { onLoginOrRegister, onLoginSuccess, winTitleOp, onSetLocalStore, onGetLocalStore, onLoadSessionData } from './ipc.js'
 import './wsClient.js'
 import { createTable } from './db/ADB.js'
+import { winTitle } from '../utils/winTitle.js'
+//import { tray } from '../utils/tray.js'
 const NODE_ENV = process.env.NODE_ENV
 const login_width = 300
 const login_height = 370
-const register_height = 500
+const register_height = 490
 // 创建窗口的函数
 function createWindow() {
   console.time('启动耗时') // 开始计时
@@ -74,15 +76,14 @@ function createWindow() {
     mainWindow.setSkipTaskbar(false)
     mainWindow.show()
   })
-
+  tray.setContextMenu(Menu.buildFromTemplate(contextMenu))
   //监听登陆注册
   onLoginOrRegister((isLogin) => {
     mainWindow.resizable = true
-    console.log(isLogin)
     if (isLogin) {
-      mainWindow.setSize(login_width, register_height)
-    } else {
       mainWindow.setSize(login_width, login_height)
+    } else {
+      mainWindow.setSize(login_width, register_height)
     }
     mainWindow.resizable = false
   })
@@ -93,6 +94,7 @@ function createWindow() {
     mainWindow.center()
     mainWindow.setMaximizable(true)
     mainWindow.setMinimumSize(800, 600)
+
     //管理员窗口操作
     if (config.admin) {
     }
@@ -100,54 +102,15 @@ function createWindow() {
       label: '用户:' + config.nickName,
       click: () => {}
     })
-    tray.setContextMenu(Menu.buildFromTemplate(contextMenu))
   })
+  //自定义窗口栏
+  winTitle(BrowserWindow)
+  //托盘
+  //tray(mainWindow)
   //监听
-  winTitleOp((e, { action, data }) => {
-    const webContents = e.sender
-    const win = BrowserWindow.fromWebContents(webContents)
-    switch (action) {
-      //关闭
-      case 'close': {
-        if (data.closeType == '0') {
-          //若应用还未登录，则关闭应用
-          win.close()
-        } else {
-          //若应用已登录，则最小化到托盘
-          win.setSkipTaskbar(true)
-          win.hide()
-        }
-        break
-      }
-
-      //最小化
-      case 'minimize': {
-        win.minimize()
-        break
-      }
-
-      //最大化-当前应用未最大化
-      case 'maximize': {
-        win.maximize()
-        break
-      }
-
-      //最大化-当前应用已最大化
-      case 'unmaximize': {
-        win.unmaximize()
-        break
-      }
-
-      //置顶
-      case 'top': {
-        win.setAlwaysOnTop(data.top)
-        break
-      }
-    }
-  })
-
   onSetLocalStore()
   onGetLocalStore()
+  onLoadSessionData()
 }
 
 // 当Electron完成初始化并准备创建浏览器窗口时，将调用此方法
