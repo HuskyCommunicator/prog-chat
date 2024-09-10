@@ -213,9 +213,7 @@ const update = (tableName, data, paramData) => {
       whereColumns.push(`${columnsMap[item]} = ?`)
     }
   }
-
   const sql = `UPDATE ${tableName} SET ${dbColumns.join(',')} ${whereColumns.length > 0 ? 'WHERE ' : ''}${whereColumns.join(' AND ')}`
-  console.log('sql:', sql)
   return run(sql, params)
 }
 

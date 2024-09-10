@@ -5,9 +5,21 @@ import ContextMenu from '@imengyu/vue3-context-menu'
 import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css'
 import 'default-passive-events'
 
+// 获取当前实例的代理对象
 const { proxy } = getCurrentInstance()
-//当前选中的会话
+
+// 当前选中的会话
 const currentChatSession = ref({})
+// 设置获取会话的消息分页信息
+const messageCountInfo = reactive({
+  totalPage: 0,
+  pageNo: 0,
+  maxMessageId: null,
+  noData: false
+})
+// 当前会话的消息记录
+const messageList = ref([])
+
 // 搜索功能
 const search = () => {}
 const searchKey = ref('')
@@ -15,45 +27,22 @@ const searchKey = ref('')
 // 聊天会话列表
 const chatSessionList = ref([])
 
-// 接收消息
-const onReceiveMessage = () => {
-  window.ipcRenderer.on('receiveChatMessage', (e, message) => {
-    // 处理接收到的消息
-  })
-}
-
 // 加载聊天会话
 const loadChatSession = () => {
   window.ipcRenderer.send('loadSessionData')
 }
 
-// 处理加载会话数据的回调
-const onLoadSessionData = () => {
-  window.ipcRenderer.on('loadSessionDataCallBack', (e, dataList) => {
-    sortChatSessionList(dataList)
-    chatSessionList.value = dataList
-  })
-}
-
 // 设置置顶
 const setTop = (data) => {
-  // console.log(
-  //   '排序前',
-  //   chatSessionList.value.map((data) => data.contact_name),
-  //   chatSessionList.value.map((data) => data.last_receive_time)
-  // )
+  // 切换置顶状态
   data.top_type = data.top_type == 0 ? 1 : 0
+  // 排序会话列表
   sortChatSessionList(chatSessionList.value)
-  // console.log(
-  //   '排序后',
-  //   chatSessionList.value.map((data) => data.contact_name),
-  //   chatSessionList.value.map((data) => data.last_receive_time)
-  // )
-  //TO ASK 不确定取消置顶的排序是否生效
+  // 发送置顶状态更新消息
   window.ipcRenderer.send('topChatSession', { contactId: data.contact_id, topType: data.top_type })
 }
 
-//排序会话
+// 排序会话列表
 const sortChatSessionList = (dataList) => {
   dataList.sort((a, b) => {
     const topTypeResult = b['top_type'] - a['top_type']
@@ -64,7 +53,7 @@ const sortChatSessionList = (dataList) => {
   })
 }
 
-//删除会话
+// 删除会话列表中的会话
 const delChatSessionList = (contactId) => {
   chatSessionList.value = chatSessionList.value.filter((item) => item.contact_id !== contactId)
 }
@@ -73,7 +62,7 @@ const delChatSessionList = (contactId) => {
 const delChatSession = (contactId) => {
   delChatSessionList(contactId)
   currentChatSession.value = {}
-  //TODO设置选中的会话
+  // 发送删除会话消息
   window.ipcRenderer.send('delChatSession', contactId)
 }
 
@@ -96,7 +85,7 @@ const onContextMenu = (e, data) => {
           proxy.Confirm({
             message: `确定要删除聊天【${data.contact_name}】吗?`,
             okfun: async () => {
-              // TODO: 调用删除聊天会话的方法
+              // 调用删除聊天会话的方法
               delChatSession(data.contact_id)
             }
           })
@@ -105,16 +94,75 @@ const onContextMenu = (e, data) => {
   })
 }
 
-// 组件挂载时的初始化操作
+// 切换会话
+const chatSessionClickHandler = (item) => {
+  currentChatSession.value = Object.assign({}, item)
+  // 清空消息记录
+  messageList.value = []
+  loadChatMessage()
+}
+
+// 加载会话消息
+const loadChatMessage = () => {
+  if (messageCountInfo.noData) {
+    return
+  }
+  messageCountInfo.pageNo++
+  window.ipcRenderer.send('loadChatMessage', {
+    sessionId: currentChatSession.value.session_id,
+    pageNo: messageCountInfo.pageNo,
+    maxMessageId: messageCountInfo.maxMessageId
+  })
+}
+
+// 接收消息
+const onReceiveMessage = () => {
+  window.ipcRenderer.on('receiveChatMessage', (e, message) => {
+    // 处理接收到的消息
+  })
+}
+
+// 处理加载会话数据的回调
+const onLoadSessionData = () => {
+  window.ipcRenderer.on('loadSessionDataCallBack', (e, dataList) => {
+    sortChatSessionList(dataList)
+    chatSessionList.value = dataList
+  })
+}
+
+// 处理加载会话分页的回调
+const onLoadChatMessage = () => {
+  window.ipcRenderer.on('loadChatMessageCallBack', (e, { dataList, pageTotal, pageNo }) => {
+    if (pageNo == pageTotal) {
+      messageCountInfo.noData = true
+    }
+    dataList.sort((a, b) => {
+      return a.message_id - b.message_id
+    })
+    messageList.value = dataList.concat(messageList.value)
+    messageCountInfo.pageNo = pageNo
+    messageCountInfo.pageTotal = pageTotal
+    if (pageNo == 1) {
+      messageCountInfo.maxMessageId = dataList.length > 0 ? dataList[dataList.length - 1].message_id : null
+      // TODO: 滚动条滚动到最底部
+    }
+    console.log(messageList.value)
+  })
+}
+
+// 组件挂载时的生命周期钩子
 onMounted(() => {
+  loadChatSession()
   onReceiveMessage()
   onLoadSessionData()
-  loadChatSession()
+  onLoadChatMessage()
 })
-//
+
+// 组件卸载时的生命周期钩子
 onUnmounted(() => {
   window.ipcRenderer.removeAllListeners('receiveChatMessage')
   window.ipcRenderer.removeAllListeners('loadSessionDataCallBack')
+  window.ipcRenderer.removeAllListeners('loadChatMessageCallBack')
 })
 </script>
 
@@ -131,7 +179,7 @@ onUnmounted(() => {
       </div>
       <div class="chat-session-list">
         <template v-for="item in chatSessionList">
-          <ChatSession :data="item" @contextmenu="(e) => onContextMenu(e, item)"></ChatSession>
+          <ChatSession :data="item" @click="chatSessionClickHandler(item)" @contextmenu="(e) => onContextMenu(e, item)"></ChatSession>
         </template>
       </div>
     </template>
