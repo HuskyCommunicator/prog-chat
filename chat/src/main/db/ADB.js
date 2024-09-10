@@ -212,7 +212,7 @@ const update = (tableName, data, paramData) => {
     }
   }
 
-  for (let item in data) {
+  for (let item in paramData) {
     if (paramData[item]) {
       params.push(paramData[item])
       whereColumns.push(`${columnsMap[item]} = ?`)
@@ -220,6 +220,7 @@ const update = (tableName, data, paramData) => {
   }
 
   const sql = `UPDATE ${tableName} SET ${dbColumns.join(',')} ${whereColumns.length > 0 ? 'WHERE ' : ''}${whereColumns.join(' AND ')}`
+  console.log('sql:', sql)
   return run(sql, params)
 }
 

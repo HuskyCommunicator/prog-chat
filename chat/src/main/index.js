@@ -3,7 +3,16 @@ import { app, shell, BrowserWindow, ipcMain, Menu, Tray } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { onLoginOrRegister, onLoginSuccess, winTitleOp, onSetLocalStore, onGetLocalStore, onLoadSessionData } from './ipc.js'
+import {
+  onLoginOrRegister,
+  onLoginSuccess,
+  winTitleOp,
+  onSetLocalStore,
+  onGetLocalStore,
+  onLoadSessionData,
+  onDelChatSession,
+  onTopChatSession
+} from './ipc.js'
 import './wsClient.js'
 import { createTable } from './db/ADB.js'
 import { winTitle } from '../utils/winTitle.js'
@@ -111,6 +120,8 @@ function createWindow() {
   onSetLocalStore()
   onGetLocalStore()
   onLoadSessionData()
+  onDelChatSession()
+  onTopChatSession()
 }
 
 // 当Electron完成初始化并准备创建浏览器窗口时，将调用此方法

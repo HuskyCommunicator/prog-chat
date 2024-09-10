@@ -14,6 +14,8 @@ import dialog from '@/components/dialog.vue'
 import message from '@/utils/message.js'
 import api from '@/utils/api.js'
 import confirm from '@/utils/confirm.js'
+import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css'
+import ContextMenu from '@imengyu/vue3-context-menu'
 
 import layout from '@/components/layout.vue'
 import ShowLocalImage from '@/components/ShowLocalImage.vue'
@@ -26,6 +28,7 @@ const app = createApp(App)
 
 app.use(ElementPlus)
 app.use(router)
+app.use(ContextMenu)
 app.use(Pinia.createPinia())
 app.component('WinOp', WinOp)
 app.component('Layout', layout)
@@ -35,6 +38,7 @@ app.component('ContentPanel', ContentPanel)
 app.component('Avatar', Avatar)
 app.component('AvatarBase', AvatarBase)
 app.component('AvatarUpload', AvatarUpload)
+
 app.config.globalProperties.Utils = utils
 app.config.globalProperties.Verify = verify
 app.config.globalProperties.Request = request

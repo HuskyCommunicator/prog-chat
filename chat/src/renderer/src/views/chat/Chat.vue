@@ -1,24 +1,83 @@
 <script setup>
 import { ref, reactive, getCurrentInstance, nextTick, onMounted } from 'vue'
+import ChatSession from './ChatSession.vue'
+import ContextMenu from '@imengyu/vue3-context-menu'
+import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css'
+import 'default-passive-events'
+
 const { proxy } = getCurrentInstance()
 
+// 搜索功能
 const search = () => {}
 const searchKey = ref('')
+
+// 聊天会话列表
 const chatSessionList = ref([])
+
+// 接收消息
 const onReceiveMessage = () => {
-  window.ipcRenderer.on('receiveChatMessage', (e, message) => {})
-}
-const onLoadSessionData = () => {
-  window.ipcRenderer.on('loadSessionDataCallBack', (e, dataList) => {
-    chatSessionList.value = dataList
-    console.log(chatSessionList.value)
+  window.ipcRenderer.on('receiveChatMessage', (e, message) => {
+    // 处理接收到的消息
   })
 }
+
+// 加载聊天会话
 const loadChatSession = () => {
   window.ipcRenderer.send('loadSessionData')
 }
+
+// 处理加载会话数据的回调
+const onLoadSessionData = () => {
+  window.ipcRenderer.on('loadSessionDataCallBack', (e, dataList) => {
+    chatSessionList.value = dataList
+  })
+}
+
+// 设置置顶
+const setTop = (data) => {
+  data.top_type = data.top_type == 0 ? 1 : 0
+  // TODO: 会话排序
+  window.ipcRenderer.send('topChatSession', { contactId: data.contact_id, topType: data.top_type })
+}
+
+// 删除聊天会话
+const delChatSession = (contactId) => {
+  window.ipcRenderer.send('delChatSession', contactId)
+}
+
+// 组件内右键菜单
+const onContextMenu = (e, data) => {
+  e.preventDefault() // 防止浏览器默认的右键菜单
+  ContextMenu.showContextMenu({
+    x: e.clientX,
+    y: e.clientY,
+    items: [
+      {
+        label: data.top_type == 0 ? '置顶' : '取消置顶',
+        onClick: () => {
+          setTop(data)
+        }
+      },
+      {
+        label: '删除聊天',
+        onClick: () =>
+          proxy.Confirm({
+            message: `确定要删除聊天【${data.contact_name}】吗?`,
+            okfun: async () => {
+              // TODO: 调用删除聊天会话的方法
+              delChatSession(data.contact_id)
+            }
+          })
+      }
+    ]
+  })
+}
+
+// 组件挂载时的初始化操作
 onMounted(() => {
-  onReceiveMessage(), onLoadSessionData(), loadChatSession()
+  onReceiveMessage()
+  onLoadSessionData()
+  loadChatSession()
 })
 </script>
 
@@ -33,12 +92,13 @@ onMounted(() => {
           </template>
         </el-input>
       </div>
-
-      <div v-for="item in chatSessionList">
-        <div>{{ item.contact_name }}</div>
+      <div class="chat-session-list">
+        <template v-for="item in chatSessionList">
+          <ChatSession :data="item" @contextmenu="(e) => onContextMenu(e, item)"></ChatSession>
+        </template>
       </div>
     </template>
-    <template #right-content></template>
+    <template #right-content> </template>
   </Layout>
 </template>
 

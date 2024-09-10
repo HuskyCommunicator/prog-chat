@@ -2,7 +2,7 @@ import store from './store.js'
 import { ipcMain } from 'electron'
 import { initWs } from './wsClient.js'
 import { addUserSetting } from './db/UserSettingModel.js'
-import { selectUserSessionList } from './db/ChatSessionUserModel.js'
+import { delChatSession, selectUserSessionList, topChatSession } from './db/ChatSessionUserModel.js'
 // 处理登录或注册事件
 export const onLoginOrRegister = (callback) => {
   ipcMain.on('loginOrRegister', (e, isLogin) => {
@@ -51,5 +51,19 @@ export const onLoadSessionData = () => {
   ipcMain.on('loadSessionData', async (e) => {
     const dataList = await selectUserSessionList()
     e.sender.send('loadSessionDataCallBack', dataList)
+  })
+}
+
+//
+export const onDelChatSession = () => {
+  ipcMain.on('delChatSession', async (e, contactId) => {
+    delChatSession(contactId)
+  })
+}
+
+//
+export const onTopChatSession = () => {
+  ipcMain.on('topChatSession', (e, { contactId, topType }) => {
+    topChatSession(contactId, topType)
   })
 }
