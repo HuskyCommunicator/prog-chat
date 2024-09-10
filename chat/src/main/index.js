@@ -12,7 +12,8 @@ import {
   onLoadSessionData,
   onDelChatSession,
   onTopChatSession,
-  onLoadChatMessage
+  onLoadChatMessage,
+  onAddLocalMessage
 } from './ipc.js'
 import './wsClient.js'
 import { createTable } from './db/ADB.js'
@@ -124,6 +125,7 @@ function createWindow() {
   onDelChatSession()
   onTopChatSession()
   onLoadChatMessage()
+  onAddLocalMessage()
 }
 
 // 当Electron完成初始化并准备创建浏览器窗口时，将调用此方法

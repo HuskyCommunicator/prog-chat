@@ -6,7 +6,9 @@ const NODE_ENV = process.env.NODE_ENV
 const userDir = os.homedir()
 
 // 根据环境变量设置数据库文件夹路径
-const dbFolder = userDir + (NODE_ENV === 'development' ? '/.easychatdev/' : '/.easychat/')
+//const dbFolder = userDir + (NODE_ENV === 'development' ? '/.easychatdev/' : '/.easychat/')
+const dbFolder = userDir + (NODE_ENV === 'development' ? '/.easychattest/' : '/.easychat/')
+
 if (!fs.existsSync(dbFolder)) {
   fs.mkdirSync(dbFolder)
 }

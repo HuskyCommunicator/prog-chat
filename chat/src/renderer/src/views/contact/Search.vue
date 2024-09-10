@@ -14,7 +14,7 @@ const userInfoStore = useUserInfoStore()
 const { proxy } = getCurrentInstance()
 
 // 将联系人ID和搜索结果初始化为响应式引用
-const contactId = ref('U85365553083')
+const contactId = ref('U79455899865')
 const searchResult = ref([])
 
 // 定义一个计算属性来确定内容类型名称
@@ -89,7 +89,13 @@ const sendMessage = () => {}
         <el-button
           type="primary"
           @click="applyContact"
-          v-if="searchResult.status == null || searchResult.status == 0 || searchResult.status == 2 || searchResult.status == 3 || searchResult.status == 4"
+          v-if="
+            searchResult.status == null ||
+            searchResult.status == 0 ||
+            searchResult.status == 2 ||
+            searchResult.status == 3 ||
+            searchResult.status == 4
+          "
           >{{ searchResult.contactType == 'USER' ? '添加到联系人' : '申请加入群组' }}</el-button
         >
         <el-button type="primary" v-if="searchResult.status == 1" @click="sendMessage">发消息</el-button>

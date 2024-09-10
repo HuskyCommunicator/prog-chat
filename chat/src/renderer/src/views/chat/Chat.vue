@@ -105,7 +105,12 @@ const chatSessionClickHandler = (item) => {
   messageCountInfo.maxMessageId = null
   messageCountInfo.noData = false
   loadChatMessage()
-  //TOUSE P37 6:00 获取聊天记录时涉及分页 但是在分页时又收到消息就会导致获取数据出错
+  //TO USE P37 6:00 获取聊天记录时涉及分页 但是在分页时又收到消息就会导致获取数据出错
+  setSessionSelect({ contactId: item.contactId, sessionId: item.sessionId })
+}
+//
+const setSessionSelect = ({ contactId, sessionId }) => {
+  window.ipcRenderer.send('setSessionSelect', { contactId, sessionId })
 }
 //加载会话消息
 const loadChatMessage = () => {

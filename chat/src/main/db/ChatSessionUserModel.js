@@ -78,4 +78,43 @@ const topChatSession = (contactId, topType) => {
   return update('chat_session_user', sessionInfo, paramData)
 }
 
-export { saveOrUpdateChatSessionBatch4Init, updateNoReadCount, updateChatSession, selectUserSessionList, delChatSession, topChatSession }
+//收到消息更新会话
+const updateSessionInfo4Message = async (currentSessionId, { sessionId, contactName, lastMessage, lastReceiveTime, contactId, memberCount }) => {
+  const params = [lastMessage, lastReceiveTime]
+  let sql = 'update chat_session_user set last_message=?,last_receive_time=?,status = 1'
+  //实时更新联系人信息
+  if (contactName) {
+    sql = sql + ',contact_name = ?'
+    params.push(contactName)
+  }
+  //成员数量
+  if (memberCount != null) {
+    sql = sql + ',member_count =?'
+    params.push(memberCount)
+  }
+  //未选中当前session增加未读消息数
+  if (sessionId !== currentSessionId) {
+    sql = sql + ',no_read_count = no_read_count + 1'
+  }
+  sql = sql + ' where user_id = ? and contact_id = ?'
+  params.push(store.getUserId())
+  params.push(contactId)
+  return run(sql, params)
+}
+
+//阅读会话所有消息
+const readAll = (contactId) => {
+  let sql = 'update chat_session_user set no_read_count = 0 where user_id=? and contact_id=?'
+  return run(sql, [store.getUserId(), contactId])
+}
+
+export {
+  saveOrUpdateChatSessionBatch4Init,
+  updateNoReadCount,
+  updateChatSession,
+  selectUserSessionList,
+  delChatSession,
+  topChatSession,
+  updateSessionInfo4Message,
+  readAll
+}

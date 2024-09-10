@@ -69,6 +69,12 @@ const submitApply = async () => {
 // 显示对话框函数
 const show = (data) => {
   dialogConfig.show = true
+  const userInfo = userInfoStore.getInfo()
+  if (userInfo && userInfo.nickName) {
+    console.log(userInfo.nickName)
+  } else {
+    console.log('nickName is undefined')
+  }
   nextTick(() => {
     formDataRef.value.resetFields()
     formData.value = Object.assign({}, data)
@@ -84,11 +90,27 @@ defineExpose({
 
 <template>
   <div>
-    <Dialog :show="dialogConfig.show" :title="dialogConfig.title" :buttons="dialogConfig.buttons" width="400px" :showCancel="false" @close="dialogConfig.show = false">
+    <Dialog
+      :show="dialogConfig.show"
+      :title="dialogConfig.title"
+      :buttons="dialogConfig.buttons"
+      width="400px"
+      :showCancel="false"
+      @close="dialogConfig.show = false"
+    >
       <el-form :model="formData" :rules="rules" ref="formDataRef" @submit.prevent>
         <!--input输入-->
         <el-form-item label="" prop="">
-          <el-input type="textarea" :rows="5" clearable placeholder="输入申请信息，更容易被通过" v-model.trim="formData.applyInfo" resize="none" show-word-limit maxlength="100"></el-input>
+          <el-input
+            type="textarea"
+            :rows="5"
+            clearable
+            placeholder="输入申请信息，更容易被通过"
+            v-model.trim="formData.applyInfo"
+            resize="none"
+            show-word-limit
+            maxlength="100"
+          ></el-input>
         </el-form-item>
       </el-form>
     </Dialog>

@@ -1,13 +1,103 @@
 <script setup>
 import { ref, reactive, getCurrentInstance, nextTick } from 'vue'
-const { proxy } = getCurrentInstance()
+import { useUserInfoStore } from '@/stores/UserInfoStore.js'
 import emojiList from '@/utils/Emoji.js'
-// const showEmojiPopoverHandler = () => {
-//   showEmojiPopover.value = true
-// }
-const sendMessage = () => {}
+import SearchAdd from '@/views/contact/SearchAdd.vue'
+const userInfoStore = useUserInfoStore()
+const { proxy } = getCurrentInstance()
+const showSendMsgPopover = ref(false)
+const showEmojiPopover = ref(false)
 const activeEmoji = ref('笑脸')
 const msgContent = ref()
+const hidePopover = () => {
+  showSendMsgPopover.value = false
+  showEmojiPopover.value = false
+}
+const props = defineProps({
+  currentChatSession: {
+    type: Object,
+    default: {}
+  }
+})
+const sendMessage = (e) => {
+  if (e.shiftKey && e.keyCode === 13) {
+    return
+  }
+  e.preventDefault()
+
+  const messageContent = msgContent.value ? msgContent.value.replace(/[\r\n]/g, '') : ''
+  if (!messageContent) {
+    showSendMsgPopover = true
+    return
+  }
+  sendMessageDo({ messageContent, messageType: 2 }, true)
+}
+const sendMessageDo = async (
+  messageObj = {
+    messageContent,
+    messageType,
+    localFilePath,
+    fileSize,
+    fileName,
+    filePath,
+    fileType
+  },
+  cleanMsgContent
+) => {
+  //TODO 判断文件大小
+  if (messageObj.fileSize == 0) {
+    proxy.Confirm({
+      message: `${messageObj.fileName}是一个空文件无法选择,请重新选择`,
+      showCancelBtn: false
+    })
+    return
+  }
+  messageObj.sessionId = props.currentChatSession.sessionId
+  messageObj.sendUserId = userInfoStore.getInfo().sendUserId
+  //请求服务器发送消息
+  let result = await proxy.Request({
+    url: proxy.Api.sendMessage,
+    showLoading: false,
+    params: {
+      messageContent: messageObj.messageContent,
+      contactId: props.currentChatSession.contactId,
+      messageType: messageObj.messageType,
+      fileSize: messageObj.fileSize,
+      fileName: messageObj.fileName,
+      fileType: messageObj.fileType
+    },
+    showError: false,
+    errorCallback: (responseData) => {
+      proxy.Confirm({
+        message: responseData.info,
+        okfun: () => {
+          addContact(props.currentChatSession.contactId, responseData.code)
+        },
+        okText: '重新申请'
+      })
+    }
+  })
+  if (!result) {
+    return
+  }
+  //更新本地消息
+  if (cleanMsgContent) {
+    msgContent.value = ''
+  }
+  Object.assign(messageObj, result.data)
+  //更新列表
+  // emit('sendMessage4Local', messageObj)
+  //保存消息到本地
+  window.ipcRenderer.send('addLocalMessage', messageObj)
+}
+//添加好友
+const searchAddRef = ref()
+const addContact = (contactId, code) => {
+  searchAddRef.value.show({
+    contactId,
+    contactType: code == 902 ? 'USER' : 'GROUP'
+  })
+}
 </script>
 
 <template>
@@ -91,6 +181,9 @@ const msgContent = ref()
         </template>
       </el-popover>
     </div>
+
+    <!--添加好友-->
+    <SearchAdd ref="searchAddRef"></SearchAdd>
   </div>
 </template>
 

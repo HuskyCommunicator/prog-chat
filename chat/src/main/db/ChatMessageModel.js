@@ -81,4 +81,4 @@ const selectMessageList = (query) => {
   })
 }
 
-export { saveMessageBatch, selectMessageList }
+export { saveMessageBatch, selectMessageList, saveMessage }
