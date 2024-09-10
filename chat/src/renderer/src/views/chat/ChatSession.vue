@@ -22,9 +22,7 @@ const props = defineProps({
     <div class="user-info">
       <div class="user-name-panel">
         <div class="user-name">{{ data.contact_name }}</div>
-        <!-- <div class="message-time">{{ formatDate(data.last_receive_time) }}</div> -->
         <div class="message-time">{{ proxy.Utils.formatDate(data.last_receive_time) }}</div>
-        <!-- 在直接引用formatDate而不是全局引入时会产生警告而无法运行 -->
       </div>
       <div class="last-message" v-html="data.last_message"></div>
     </div>
@@ -38,6 +36,15 @@ const props = defineProps({
   position: relative;
   display: flex;
   border-bottom: 1px solid #ddd;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: #f0f0f0; /* 鼠标经过时的背景色 */
+  }
+
+  &.active {
+    background-color: #e0e0e0; /* active 状态的背景色 */
+  }
 }
 
 .contact-tag {
@@ -51,15 +58,23 @@ const props = defineProps({
   padding: 1px 2px;
   border-radius: 0px 3px 3px 0px;
   line-height: 12px;
-}
 
-.contact-tag:hover {
-  cursor: pointer;
-  background: #d8d8d7;
+  &:hover {
+    cursor: pointer;
+    background: #d8d8d7;
+  }
 }
 
 .message-time {
   color: #9a9898 !important;
+  width: 55px;
+  font-size: 12px;
+  text-align: right;
+
+  &:hover {
+    background: #c9c8c6;
+    color: #999999 !important;
+  }
 }
 
 .user-info {
@@ -75,19 +90,11 @@ const props = defineProps({
 }
 
 .user-name {
-  //  width: 14px;
   color: #000000;
   font-size: 14px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.message-time {
-  width: 55px;
-  color: #b6b6b6;
-  font-size: 12px;
-  text-align: right;
 }
 
 .last-message {
@@ -107,15 +114,10 @@ const props = defineProps({
   top: 0px;
   font-size: 12px;
   color: #8f8f8f;
-}
 
-.chat-top.active {
-  cursor: pointer;
-  background: #c9c8c6;
-}
-
-.message-time:hover {
-  background: #c9c8c6;
-  color: #999999 !important;
+  &.active {
+    cursor: pointer;
+    background: #c9c8c6;
+  }
 }
 </style>

@@ -10,14 +10,14 @@ const { proxy } = getCurrentInstance()
 
 // 当前选中的会话
 const currentChatSession = ref({})
-// 设置获取会话的消息分页信息
-const messageCountInfo = reactive({
+//设置获取会话的消息分页
+const messageCountInfo = {
   totalPage: 0,
   pageNo: 0,
   maxMessageId: null,
   noData: false
-})
-// 当前会话的消息记录
+}
+//当前会话消息记录
 const messageList = ref([])
 
 // 搜索功能
@@ -94,18 +94,22 @@ const onContextMenu = (e, data) => {
   })
 }
 
-// 切换会话
+//切换会话
 const chatSessionClickHandler = (item) => {
   currentChatSession.value = Object.assign({}, item)
-  // 清空消息记录
+  //TODO清空消息记录数
   messageList.value = []
+  messageCountInfo.pageNo = 0
+  messageCountInfo.totalPage = 1
+  messageCountInfo.maxMessageId = null
+  messageCountInfo.noData = false
   loadChatMessage()
+  //TOUSE P37 6:00 获取聊天记录时涉及分页 但是在分页时又收到消息就会导致获取数据出错
 }
-
-// 加载会话消息
+//加载会话消息
 const loadChatMessage = () => {
   if (messageCountInfo.noData) {
-    return
+    return console.log('没有更多数据供加载')
   }
   messageCountInfo.pageNo++
   window.ipcRenderer.send('loadChatMessage', {
@@ -119,6 +123,7 @@ const loadChatMessage = () => {
 const onReceiveMessage = () => {
   window.ipcRenderer.on('receiveChatMessage', (e, message) => {
     // 处理接收到的消息
+    console.log('收到消息', message)
   })
 }
 
@@ -129,8 +134,7 @@ const onLoadSessionData = () => {
     chatSessionList.value = dataList
   })
 }
-
-// 处理加载会话分页的回调
+//处理加载会话分页的回调
 const onLoadChatMessage = () => {
   window.ipcRenderer.on('loadChatMessageCallBack', (e, { dataList, pageTotal, pageNo }) => {
     if (pageNo == pageTotal) {
@@ -144,25 +148,25 @@ const onLoadChatMessage = () => {
     messageCountInfo.pageTotal = pageTotal
     if (pageNo == 1) {
       messageCountInfo.maxMessageId = dataList.length > 0 ? dataList[dataList.length - 1].message_id : null
-      // TODO: 滚动条滚动到最底部
+      //TODO滚动条滚动到最底部
     }
     console.log(messageList.value)
   })
 }
 
-// 组件挂载时的生命周期钩子
+// 组件挂载时的初始化操作
 onMounted(() => {
+  onLoadChatMessage()
   loadChatSession()
   onReceiveMessage()
   onLoadSessionData()
-  onLoadChatMessage()
 })
 
-// 组件卸载时的生命周期钩子
+// 组件卸载时的清理操作
 onUnmounted(() => {
   window.ipcRenderer.removeAllListeners('receiveChatMessage')
   window.ipcRenderer.removeAllListeners('loadSessionDataCallBack')
-  window.ipcRenderer.removeAllListeners('loadChatMessageCallBack')
+  window.ipcRenderer.removeAllListeners('loadChatMessage')
 })
 </script>
 
