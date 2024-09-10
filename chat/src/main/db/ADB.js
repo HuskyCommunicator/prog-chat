@@ -58,8 +58,6 @@ const initTableColumnsMap = async () => {
     let columns = await queryAll(sql, [])
     const columnsMapItem = {}
     for (let j = 0; j < columns.length; j++) {
-      //TO ASK
-      const column = columns[j]
       columnsMapItem[toCamelCase(columns[j].name)] = columns[j].name
     }
     globalColumnsMap[tables[i].name] = columnsMapItem
@@ -73,7 +71,7 @@ const convertDbObj2BizObj = (data) => {
   }
   const bizData = {}
   for (let item in data) {
-    bizData[item] = data[item]
+    bizData[toCamelCase(item)] = data[item]
   }
   return bizData
 }
@@ -178,7 +176,7 @@ const insert = (sqlPrefix, tableName, data) => {
     throw new Error('No valid columns found for insertion.')
   }
 
-  const prepare = dbColumns.map(() => '?').join(',')
+  const prepare = '?'.repeat(dbColumns.length).split('').join(',')
   const sql = `${sqlPrefix} ${tableName} (${dbColumns.join(',')}) VALUES (${prepare})`
   return run(sql, params)
 }

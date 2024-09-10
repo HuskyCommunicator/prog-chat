@@ -6,7 +6,7 @@ const NODE_ENV = process.env.NODE_ENV
 const userDir = os.homedir()
 
 // 根据环境变量设置数据库文件夹路径
-const dbFolder = userDir + (NODE_ENV === 'development' ? '/.easychattest/' : '/.easychat/')
+const dbFolder = userDir + (NODE_ENV === 'development' ? '/.easychatdev/' : '/.easychat/')
 if (!fs.existsSync(dbFolder)) {
   fs.mkdirSync(dbFolder)
 }
@@ -60,8 +60,8 @@ const addUserSetting = async (userId, email) => {
   if (userInfo) {
     // 如果用户设置已存在，更新email
     await update('user_setting', { email: email }, { userId: userId })
-    resultServerPort = userInfo.server_port
-    localFileFolder = JSON.parse(userInfo.sys_setting).localFileFolder + userId
+    resultServerPort = userInfo.serverPort
+    localFileFolder = JSON.parse(userInfo.sysSetting).localFileFolder + userId
   } else {
     // 如果用户设置不存在，插入新的记录
     await insertIgnore('user_setting', {

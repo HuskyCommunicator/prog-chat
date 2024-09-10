@@ -17,16 +17,16 @@ const props = defineProps({
 
 <template>
   <div :class="['chat-session-item', currentSession ? 'active' : '']">
-    <div class="contact-tag" v-if="data.contact_type == 1">群</div>
-    <AvatarBase :userId="data.contact_id" />
+    <div class="contact-tag" v-if="data.contactType == 1">群</div>
+    <AvatarBase :userId="data.contactId" />
     <div class="user-info">
       <div class="user-name-panel">
-        <div class="user-name">{{ data.contact_name }}</div>
-        <div class="message-time">{{ proxy.Utils.formatDate(data.last_receive_time) }}</div>
+        <div class="user-name">{{ data.contactName }}</div>
+        <div class="message-time">{{ proxy.Utils.formatDate(data.lastReceiveTime) }}</div>
       </div>
-      <div class="last-message" v-html="data.last_message"></div>
+      <div class="last-message" v-html="data.lastMessage"></div>
     </div>
-    <div class="chat-top iconfont icon-top" v-if="data.top_type == 1"></div>
+    <div class="chat-top iconfont icon-top" v-if="data.topType == 1"></div>
   </div>
 </template>
 

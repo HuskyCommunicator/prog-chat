@@ -4,12 +4,13 @@ import ChatSession from './ChatSession.vue'
 import ContextMenu from '@imengyu/vue3-context-menu'
 import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css'
 import 'default-passive-events'
-
+import MessageSend from './MessageSend.vue'
 // 获取当前实例的代理对象
 const { proxy } = getCurrentInstance()
 
 // 当前选中的会话
 const currentChatSession = ref({})
+
 //设置获取会话的消息分页
 const messageCountInfo = {
   totalPage: 0,
@@ -35,19 +36,19 @@ const loadChatSession = () => {
 // 设置置顶
 const setTop = (data) => {
   // 切换置顶状态
-  data.top_type = data.top_type == 0 ? 1 : 0
+  data.topType = data.topType == 0 ? 1 : 0
   // 排序会话列表
   sortChatSessionList(chatSessionList.value)
   // 发送置顶状态更新消息
-  window.ipcRenderer.send('topChatSession', { contactId: data.contact_id, topType: data.top_type })
+  window.ipcRenderer.send('topChatSession', { contactId: data.contactId, topType: data.topType })
 }
 
 // 排序会话列表
 const sortChatSessionList = (dataList) => {
   dataList.sort((a, b) => {
-    const topTypeResult = b['top_type'] - a['top_type']
+    const topTypeResult = b['topType'] - a['topType']
     if (topTypeResult == 0) {
-      return b['last_receive_time'] - a['last_receive_time']
+      return b['lastReceiveTime'] - a['lastReceiveTime']
     }
     return topTypeResult
   })
@@ -55,7 +56,7 @@ const sortChatSessionList = (dataList) => {
 
 // 删除会话列表中的会话
 const delChatSessionList = (contactId) => {
-  chatSessionList.value = chatSessionList.value.filter((item) => item.contact_id !== contactId)
+  chatSessionList.value = chatSessionList.value.filter((item) => item.contactId !== contactId)
 }
 
 // 删除聊天会话
@@ -74,7 +75,7 @@ const onContextMenu = (e, data) => {
     y: e.clientY,
     items: [
       {
-        label: data.top_type == 0 ? '置顶' : '取消置顶',
+        label: data.topType == 0 ? '置顶' : '取消置顶',
         onClick: () => {
           setTop(data)
         }
@@ -83,10 +84,10 @@ const onContextMenu = (e, data) => {
         label: '删除聊天',
         onClick: () =>
           proxy.Confirm({
-            message: `确定要删除聊天【${data.contact_name}】吗?`,
+            message: `确定要删除聊天【${data.contactName}】吗?`,
             okfun: async () => {
               // 调用删除聊天会话的方法
-              delChatSession(data.contact_id)
+              delChatSession(data.contactId)
             }
           })
       }
@@ -113,7 +114,7 @@ const loadChatMessage = () => {
   }
   messageCountInfo.pageNo++
   window.ipcRenderer.send('loadChatMessage', {
-    sessionId: currentChatSession.value.session_id,
+    sessionId: currentChatSession.value.sessionId,
     pageNo: messageCountInfo.pageNo,
     maxMessageId: messageCountInfo.maxMessageId
   })
@@ -141,13 +142,13 @@ const onLoadChatMessage = () => {
       messageCountInfo.noData = true
     }
     dataList.sort((a, b) => {
-      return a.message_id - b.message_id
+      return a.messageId - b.messageId
     })
     messageList.value = dataList.concat(messageList.value)
     messageCountInfo.pageNo = pageNo
     messageCountInfo.pageTotal = pageTotal
     if (pageNo == 1) {
-      messageCountInfo.maxMessageId = dataList.length > 0 ? dataList[dataList.length - 1].message_id : null
+      messageCountInfo.maxMessageId = dataList.length > 0 ? dataList[dataList.length - 1].messageId : null
       //TODO滚动条滚动到最底部
     }
     console.log(messageList.value)
@@ -156,10 +157,9 @@ const onLoadChatMessage = () => {
 
 // 组件挂载时的初始化操作
 onMounted(() => {
-  onLoadChatMessage()
   loadChatSession()
   onReceiveMessage()
-  onLoadSessionData()
+  onLoadSessionData(), onLoadChatMessage()
 })
 
 // 组件卸载时的清理操作
@@ -187,7 +187,23 @@ onUnmounted(() => {
         </template>
       </div>
     </template>
-    <template #right-content> </template>
+    <template #right-content>
+      <div class="title-panel drag" v-if="Object.keys(currentChatSession).length > 0">
+        <div class="title">
+          <span>{{ currentChatSession.contactName }}</span>
+          <span v-if="currentChatSession.contactType == 1"> ({{ currentChatSession.memberCount }}) </span>
+        </div>
+      </div>
+      <div v-if="currentChatSession.contactType == 1" class="iconfont icon-more no-drag" @click="showGroupDetail"></div>
+      <div class="chat-panel" v-show="Object.keys(currentChatSession).length > 0">
+        <div class="message-panel" id="message-panel">
+          <div class="message-item" v-for="(data, index) in messageList" :id="'message' + data.messageId">
+            {{ data.messageContent }}
+          </div>
+        </div>
+        <MessageSend ref="messageSendRef" :currentChatSession="currentChatSession"> </MessageSend>
+      </div>
+    </template>
   </Layout>
 </template>
 

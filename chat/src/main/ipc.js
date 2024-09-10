@@ -71,7 +71,11 @@ export const onTopChatSession = () => {
 //
 export const onLoadChatMessage = () => {
   ipcMain.on('loadChatMessage', async (e, data) => {
+    console.log(data)
+
     const result = await selectMessageList(data)
+    // console.log(result)
+
     e.sender.send('loadChatMessageCallBack', result)
   })
 }
