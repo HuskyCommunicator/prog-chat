@@ -1,6 +1,5 @@
 import { app, shell, BrowserWindow, ipcMain, Menu, Tray } from 'electron'
 import icon from '../../resources/icon.png?asset'
-import { onLoginOrRegister, onLoginSuccess, winTitleOp, onSetLocalStore, onGetLocalStore } from './ipc.js'
 export const tray = (mainWindow) => {
   const tray = new Tray(icon)
   const contextMenu = [

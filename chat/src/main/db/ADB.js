@@ -64,7 +64,6 @@ const initTableColumnsMap = async () => {
     }
     globalColumnsMap[tables[i].name] = columnsMapItem
   }
-  // console.log('initTableColumnsMap', globalColumnsMap)
 }
 
 // 将数据库对象转换为业务对象
@@ -116,7 +115,6 @@ const queryOne = (sql, params) => {
         resolve({})
       }
       resolve(convertDbObj2BizObj(row))
-      //  console.log(`执行的SQL语句为sql:${sql},params:${params}，row:${JSON.stringify(row)}`)
     })
     stmt.finalize((finalizeErr) => {
       if (finalizeErr) {
@@ -151,11 +149,8 @@ const run = (sql, params) => {
     stmt.run(params, (err, row) => {
       if (err) {
         console.error('SQL error:', err)
-        //console.log(`执行的SQL语句为sql:${sql},params:${params},row:${JSON.stringify(row)}`)
-
         resolve('操作数据库失败')
       }
-      // console.log(`执行的SQL语句为sql:${sql},params:${params},执行记录数:${this.changes}`)
       resolve(this.changes)
     })
     stmt.finalize((finalizeErr) => {

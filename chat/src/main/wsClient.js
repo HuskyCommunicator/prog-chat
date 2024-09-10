@@ -43,7 +43,6 @@ const createWs = () => {
 
   // 从服务端接收到消息的回调函数
   ws.onmessage = async (e) => {
-    //  console.log('收到服务器消息', e.data)
     sender.send('receiveMessage', e.data)
     const message = JSON.parse(e.data)
     const messageType = message.messageType
@@ -99,7 +98,6 @@ const createWs = () => {
   // 定时发送心跳包
   setInterval(() => {
     if (ws != null && ws.readyState === 1) {
-      //console.log('发送心跳')
       ws.send('heart beat')
     }
   }, 3000)

@@ -59,7 +59,6 @@ const updateNoReadCount = ({ contactId, noReadCount }) => {
 const selectUserSessionList = () => {
   let sql = 'select * from chat_session_user where user_id= ? and status=1'
   console.log(sql)
-
   return queryAll(sql, [store.getUserId()])
 }
 //删除会话消息
@@ -68,7 +67,6 @@ const delChatSession = (contactId) => {
   const sessionInfo = {
     status: 0
   }
-  console.log('sessionInfo:', sessionInfo, 'paramData:', paramData)
   return update('chat_session_user', sessionInfo, paramData)
 }
 

@@ -1,12 +1,13 @@
 <script setup>
-import { ref, reactive, getCurrentInstance, nextTick, onMounted } from 'vue'
+import { ref, reactive, getCurrentInstance, nextTick, onMounted, onUnmounted } from 'vue'
 import ChatSession from './ChatSession.vue'
 import ContextMenu from '@imengyu/vue3-context-menu'
 import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css'
 import 'default-passive-events'
 
 const { proxy } = getCurrentInstance()
-
+//当前选中的会话
+const currentChatSession = ref({})
 // 搜索功能
 const search = () => {}
 const searchKey = ref('')
@@ -29,19 +30,50 @@ const loadChatSession = () => {
 // 处理加载会话数据的回调
 const onLoadSessionData = () => {
   window.ipcRenderer.on('loadSessionDataCallBack', (e, dataList) => {
+    sortChatSessionList(dataList)
     chatSessionList.value = dataList
   })
 }
 
 // 设置置顶
 const setTop = (data) => {
+  // console.log(
+  //   '排序前',
+  //   chatSessionList.value.map((data) => data.contact_name),
+  //   chatSessionList.value.map((data) => data.last_receive_time)
+  // )
   data.top_type = data.top_type == 0 ? 1 : 0
-  // TODO: 会话排序
+  sortChatSessionList(chatSessionList.value)
+  // console.log(
+  //   '排序后',
+  //   chatSessionList.value.map((data) => data.contact_name),
+  //   chatSessionList.value.map((data) => data.last_receive_time)
+  // )
+  //TO ASK 不确定取消置顶的排序是否生效
   window.ipcRenderer.send('topChatSession', { contactId: data.contact_id, topType: data.top_type })
+}
+
+//排序会话
+const sortChatSessionList = (dataList) => {
+  dataList.sort((a, b) => {
+    const topTypeResult = b['top_type'] - a['top_type']
+    if (topTypeResult == 0) {
+      return b['last_receive_time'] - a['last_receive_time']
+    }
+    return topTypeResult
+  })
+}
+
+//删除会话
+const delChatSessionList = (contactId) => {
+  chatSessionList.value = chatSessionList.value.filter((item) => item.contact_id !== contactId)
 }
 
 // 删除聊天会话
 const delChatSession = (contactId) => {
+  delChatSessionList(contactId)
+  currentChatSession.value = {}
+  //TODO设置选中的会话
   window.ipcRenderer.send('delChatSession', contactId)
 }
 
@@ -78,6 +110,11 @@ onMounted(() => {
   onReceiveMessage()
   onLoadSessionData()
   loadChatSession()
+})
+//
+onUnmounted(() => {
+  window.ipcRenderer.removeAllListeners('receiveChatMessage')
+  window.ipcRenderer.removeAllListeners('loadSessionDataCallBack')
 })
 </script>
 
