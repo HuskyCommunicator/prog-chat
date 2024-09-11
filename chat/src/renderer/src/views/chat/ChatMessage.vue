@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, getCurrentInstance, nextTick, defineProps } from 'vue'
+import { ref, reactive, getCurrentInstance, nextTick } from 'vue'
 const { proxy } = getCurrentInstance()
 import { useUserInfoStore } from '@/stores/UserInfoStore'
 const userInfoStore = useUserInfoStore()
@@ -13,7 +13,6 @@ const props = defineProps({
     default: () => ({})
   }
 })
-console.log(props.data, props.currentChatSession)
 </script>
 
 <template>

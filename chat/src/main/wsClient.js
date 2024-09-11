@@ -3,6 +3,7 @@ import store from './store'
 import { saveOrUpdate4Message, saveOrUpdateChatSessionBatch4Init, selectUserSessionByContactId } from './db/ChatSessionUserModel'
 import { saveMessage, saveMessageBatch } from './db/ChatMessageModel'
 import { updateContactNoReadCount } from './db/UserSettingModel'
+import { messageTypes } from 'element-plus/lib/components/index.js'
 const NODE_ENV = process.env.NODE_ENV
 let ws = null
 let maxReConnectTimes = null
@@ -74,9 +75,9 @@ const createWs = () => {
         await saveOrUpdate4Message(store.getUserData('currentSessionId'), sessionInfo)
         //写入本地消息
         await saveMessage(message)
-        const dbSessionInfo = await selectUserSessionByContactId()
+        const dbSessionInfo = await selectUserSessionByContactId(message.contactId)
         message.extendData = dbSessionInfo
-        sender.send('receiveMessage', message)
+        sender.send('receiveChatMessage', message)
         break
     }
   }

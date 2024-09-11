@@ -13,6 +13,7 @@ const fileLimit = 1
 
 const closePopover = () => {}
 const openPopover = () => {}
+const emit = defineEmits(['sendMessage4Local'])
 const hidePopover = () => {
   showSendMsgPopover.value = false
   showEmojiPopover.value = false
@@ -90,7 +91,7 @@ const sendMessageDo = async (
   }
   Object.assign(messageObj, result.data)
   //更新列表
-  // emit('sendMessage4Local', messageObj)
+  emit('sendMessage4Local', messageObj)
   //保存消息到本地
   window.ipcRenderer.send('addLocalMessage', messageObj)
 }

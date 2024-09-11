@@ -126,11 +126,39 @@ const loadChatMessage = () => {
   })
 }
 
-// 接收消息
+// 定义一个函数，用于接收消息
 const onReceiveMessage = () => {
+  // 监听 'receiveChatMessage' 事件
   window.ipcRenderer.on('receiveChatMessage', (e, message) => {
-    // 处理接收到的消息
-    console.log('收到消息', message)
+    // 打印接收到的消息，用于调试
+    // 在 chatSessionList 中查找与接收到的消息的 sessionId 匹配的会话
+    let curSession = chatSessionList.value.find((item) => {
+      return item.sessionId == message.sessionId
+    })
+
+    // 如果没有找到匹配的会话
+    if (curSession == null) {
+      // 将消息的扩展数据添加到 chatSessionList 中
+      chatSessionList.value.push(message.extendData)
+    } else {
+      // 将消息的扩展数据合并到找到的会话对象中
+      Object.assign(curSession, message.extendData)
+    }
+
+    // 对 chatSessionList 进行排序
+    sortChatSessionList(chatSessionList.value)
+
+    // 如果接收到的消息的 sessionId 与当前会话的 sessionId 不匹配
+    if (message.sessionId != currentChatSession.value.sessionId) {
+      // TODO 展示未读消息气泡
+    } else {
+      // 将消息的扩展数据合并到当前会话对象中
+      Object.assign(currentChatSession.value, message.extendData)
+      // 将接收到的消息添加到消息列表中
+      messageList.value.push(message)
+      // 滚动到消息列表的底部
+      goToBottom()
+    }
   })
 }
 
@@ -155,9 +183,8 @@ const onLoadChatMessage = () => {
     messageCountInfo.pageTotal = pageTotal
     if (pageNo == 1) {
       messageCountInfo.maxMessageId = dataList.length > 0 ? dataList[dataList.length - 1].messageId : null
-      //TODO滚动条滚动到最底部
+      goToBottom
     }
-    // console.log(messageList.value)
   })
 }
 
@@ -174,7 +201,48 @@ onUnmounted(() => {
   window.ipcRenderer.removeAllListeners('loadSessionDataCallBack')
   window.ipcRenderer.removeAllListeners('loadChatMessage')
 })
-const showMediaDetailHandler = () => {}
+const sendMessage4LocalHandler = (messageObj) => {
+  // 将传入的消息对象添加到消息列表中
+  messageList.value.push(messageObj)
+
+  // 在聊天会话列表中查找与消息对象的 sessionId 匹配的会话
+  const chatSession = chatSessionList.value.find((item) => {
+    return item.sessionId == messageObj.sessionId
+  })
+
+  // 打印找到的会话对象，用于调试
+  console.log('chatSession', chatSession)
+
+  // 如果找到匹配的会话对象
+  if (chatSession) {
+    // 更新会话的最后一条消息和最后接收时间
+    chatSession.lastMessage = messageObj.lastMessage
+    chatSession.lastReceiveTime = messageObj.sendTime
+  }
+
+  // 对聊天会话列表进行排序
+  sortChatSessionList(chatSessionList.value)
+
+  // 滚动到消息列表的底部
+  goToBottom()
+}
+
+//滚动到底部
+const goToBottom = () => {
+  // 在下一个 DOM 更新周期后执行回调函数
+  nextTick(() => {
+    // 选择所有具有类名 'message-item' 的 DOM 元素
+    const items = document.querySelectorAll('.message-item')
+    // 如果找到的元素数量大于 0
+    if (items.length > 0) {
+      // 设置一个 100 毫秒的延迟后执行回调函数
+      setTimeout(() => {
+        // 滚动到最后一个元素的位置
+        items[items.length - 1].scrollIntoView()
+      }, 100)
+    }
+  })
+}
 </script>
 
 <template>
@@ -190,7 +258,12 @@ const showMediaDetailHandler = () => {}
       </div>
       <div class="chat-session-list">
         <template v-for="item in chatSessionList">
-          <ChatSession :data="item" @click="chatSessionClickHandler(item)" @contextmenu="(e) => onContextMenu(e, item)"></ChatSession>
+          <ChatSession
+            :data="item"
+            @click="chatSessionClickHandler(item)"
+            @contextmenu="(e) => onContextMenu(e, item)"
+            :currentSession="item.contactId == currentChatSession.contactId"
+          ></ChatSession>
         </template>
       </div>
     </template>
@@ -210,7 +283,7 @@ const showMediaDetailHandler = () => {}
             </template>
           </div>
         </div>
-        <MessageSend ref="messageSendRef" :currentChatSession="currentChatSession"> </MessageSend>
+        <MessageSend ref="messageSendRef" :currentChatSession="currentChatSession" @sendMessage4Local="sendMessage4LocalHandler"> </MessageSend>
       </div>
     </template>
   </Layout>
