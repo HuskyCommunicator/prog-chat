@@ -12,12 +12,37 @@ const moment = require('moment')
 moment.locale('zh-cn', {})
 const { dialog } = require('electron')
 
+//缩略图后缀
+const cover_image_suffix = '_cover.png'
+const image_suffix = '.png'
+
+const ffprobePath = '/assets/ffprobe.exe'
+const ffmpegPath = '/assets/ffmpeg.exe'
+
 const saveFile2Local = (messageId, filePath, fileType) => {
   return new Promise(async (resolve, reject) => {
     let savePath = await getLocalFilePath('chat', false, messageId)
     fs.copyFileSync(filePath, savePath)
     resolve()
   })
+}
+
+//获取资源路径
+const getResourcesPath = () => {
+  let resourcesPath = app.getAppPath()
+  if (NODE_ENV !== 'development') {
+    resourcesPath = path.dirname(app.getPath('exe'), +'/resources')
+  }
+}
+
+//获取ffprobe路径
+const getFFprobePath = () => {
+  return path.join(getResourcesPath(), ffprobePath)
+}
+
+//获取ffmpeg路径
+const getFFmpegPath = () => {
+  return path.join(getResourcesPath(), ffmpegPath)
 }
 
 //递归创建目录

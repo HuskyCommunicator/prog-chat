@@ -1,19 +1,25 @@
-const fs = require('fs')
-const path = require('path')
-
-const mkdirs = (dir) => {
-  // 检查目录是否存在
-  if (!fs.existsSync(dir)) {
-    // 获取上一级目录的路径
-    const parentDir = path.dirname(dir)
-    // 如果上一级目录与当前目录不同，递归创建上一级目录
-    if (parentDir !== dir) {
-      mkdirs(parentDir)
-    }
-    // 创建当前目录
-    fs.mkdirSync(dir)
-  }
+const { exec } = require('child_process')
+const test = async () => {
+  const ffprobePath = 'D:\\program\\code\\web\\prog-chat\\chat\\assets\\ffprobe.exe'
+  const command = `${ffprobePath} -v error -select_streams v:0 -show_entries stream=codec_name "D:\\Users\\32153\\Desktop\\i\\dm.mp4"`
+  let result = await execCommand(command)
+  result = result.replaceAll('\r\n', '')
+  result = result.substring(result.indexOf('=') + 1)
+  let codec = result.substring(0, result.indexOf('['))
+  console.log('获取的视频格式编码为', codec)
 }
 
-// 示例用法
-mkdirs('c:/111/222/333')
+// D:\\program\\code\\web\\prog-chat\\chat\\assets\\ffprobe.exe -v error -select_streams v:0 -show_entries stream=codec_name "D:\\Users\\32153\\Desktop\\i\\dm.mp4"
+
+const execCommand = (command) => {
+  return new Promise((resolve, reject) => {
+    exec(command, (error, stdout, stderr) => {
+      console.log('ffmpeg命令:', command)
+      if (error) {
+        console.error('ffmpeg命令执行失败:', error)
+      }
+      resolve(stdout)
+    })
+  })
+}
+test()
