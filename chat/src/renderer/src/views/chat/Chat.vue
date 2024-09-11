@@ -210,9 +210,6 @@ const sendMessage4LocalHandler = (messageObj) => {
     return item.sessionId == messageObj.sessionId
   })
 
-  // 打印找到的会话对象，用于调试
-  console.log('chatSession', chatSession)
-
   // 如果找到匹配的会话对象
   if (chatSession) {
     // 更新会话的最后一条消息和最后接收时间

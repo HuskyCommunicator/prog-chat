@@ -3,40 +3,62 @@ import { ref, reactive, getCurrentInstance, nextTick } from 'vue'
 import { useUserInfoStore } from '@/stores/UserInfoStore.js'
 import emojiList from '@/utils/Emoji.js'
 import SearchAdd from '@/views/contact/SearchAdd.vue'
+import { getFileType } from '@/utils/Constants.js'
+
+// 获取用户信息存储
 const userInfoStore = useUserInfoStore()
+// 获取当前实例的代理
 const { proxy } = getCurrentInstance()
+
+// 定义响应式变量
 const showSendMsgPopover = ref(false)
 const showEmojiPopover = ref(false)
 const activeEmoji = ref('笑脸')
 const msgContent = ref()
 const fileLimit = 1
 
+// 定义关闭弹出框的函数
 const closePopover = () => {}
+
+// 定义打开弹出框的函数
 const openPopover = () => {}
+
+// 定义事件发射器
 const emit = defineEmits(['sendMessage4Local'])
+
+// 隐藏弹出框的函数
 const hidePopover = () => {
   showSendMsgPopover.value = false
   showEmojiPopover.value = false
 }
+
+// 定义组件的 props
 const props = defineProps({
   currentChatSession: {
     type: Object,
     default: {}
   }
 })
+
+// 发送消息的函数
 const sendMessage = (e) => {
+  // 如果按下 Shift + Enter，则不发送消息
   if (e.shiftKey && e.keyCode === 13) {
     return
   }
   e.preventDefault()
 
+  // 获取消息内容并去除换行符
   const messageContent = msgContent.value ? msgContent.value.replace(/[\r\n]/g, '') : ''
   if (!messageContent) {
-    showSendMsgPopover = true
+    showSendMsgPopover.value = true
     return
   }
+  // 调用发送消息的函数
   sendMessageDo({ messageContent, messageType: 2 }, true)
 }
+
+// 发送消息的具体实现函数
 const sendMessageDo = async (
   messageObj = {
     messageContent,
@@ -49,7 +71,7 @@ const sendMessageDo = async (
   },
   cleanMsgContent
 ) => {
-  //TODO 判断文件大小
+  // 判断文件大小
   if (messageObj.fileSize == 0) {
     proxy.Confirm({
       message: `${messageObj.fileName}是一个空文件无法选择,请重新选择`,
@@ -57,9 +79,11 @@ const sendMessageDo = async (
     })
     return
   }
+  // 设置消息的会话 ID 和发送用户 ID
   messageObj.sessionId = props.currentChatSession.sessionId
   messageObj.sendUserId = userInfoStore.getInfo().sendUserId
-  //请求服务器发送消息
+
+  // 请求服务器发送消息
   let result = await proxy.Request({
     url: proxy.Api.sendMessage,
     showLoading: false,
@@ -85,18 +109,57 @@ const sendMessageDo = async (
   if (!result) {
     return
   }
-  //更新本地消息
+  // 更新本地消息
   if (cleanMsgContent) {
     msgContent.value = ''
   }
   Object.assign(messageObj, result.data)
-  //更新列表
+  // 更新列表
   emit('sendMessage4Local', messageObj)
-  //保存消息到本地
+  // 保存消息到本地
   window.ipcRenderer.send('addLocalMessage', messageObj)
 }
-//添加好友
+
+// 定义一个响应式引用，用于上传文件的引用
+const uploadRef = ref()
+
+// 定义一个函数，用于处理文件上传
+const uploadFile = (file) => {
+  // 调用上传文件的具体实现函数，并传入文件对象
+  uploadFileDo(file.file)
+  // 清空上传文件的引用
+  uploadRef.value.clearFiles()
+}
+
+// 定义一个函数，用于具体实现文件上传
+const uploadFileDo = (file) => {
+  // 获取文件类型
+  const fileType = getFileTypeByName(file.name)
+  sendMessageDo(
+    {
+      messageContent: '[' + getFileType(fileType) + ']',
+      messageType: 5,
+      fileSize: file.size,
+      fileName: file.name,
+      filePath: file.path,
+      fileType: fileType
+    },
+    false
+  )
+}
+
+// 定义一个函数，根据文件名获取文件类型
+const getFileTypeByName = (fileName) => {
+  // 获取文件后缀名
+  const fileSuffix = fileName.substr(fileName.lastIndexOf('.') + 1)
+  // 根据文件后缀名获取文件类型
+  return getFileType(fileSuffix)
+}
+
+// 添加好友的引用
 const searchAddRef = ref()
+
+// 添加好友的函数
 const addContact = (contactId, code) => {
   searchAddRef.value.show({
     contactId,

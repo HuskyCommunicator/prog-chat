@@ -3,7 +3,8 @@ import { ipcMain } from 'electron'
 import { initWs } from './wsClient.js'
 import { addUserSetting } from './db/UserSettingModel.js'
 import { delChatSession, readAll, selectUserSessionList, topChatSession, updateSessionInfo4Message } from './db/ChatSessionUserModel.js'
-import { saveMessage, selectMessageList } from './db/ChatMessageModel.js'
+import { saveMessage, selectMessageList, updateMessage } from './db/ChatMessageModel.js'
+import { saveFile } from './file.js'
 // 处理登录或注册事件
 export const onLoginOrRegister = (callback) => {
   ipcMain.on('loginOrRegister', (e, isLogin) => {
@@ -80,7 +81,16 @@ export const onLoadChatMessage = () => {
 export const onAddLocalMessage = () => {
   ipcMain.on('addLocalMessage', async (e, data) => {
     await saveMessage(data)
-    //TODO 保存文件
+
+    if ((data.messageType = 5)) {
+      await saveFile2Local(data.messageId, data.filePath, data.fileType)
+
+      const updateInfo = {
+        status: 1
+      }
+      await updateMessage(updateInfo, { messageId: data.messageId })
+    }
+
     //更新session
     data.lastReceiveTime = data.sendTime
     //TODO更新会话
