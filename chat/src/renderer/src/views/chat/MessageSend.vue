@@ -9,6 +9,10 @@ const showSendMsgPopover = ref(false)
 const showEmojiPopover = ref(false)
 const activeEmoji = ref('笑脸')
 const msgContent = ref()
+const fileLimit = 1
+
+const closePopover = () => {}
+const openPopover = () => {}
 const hidePopover = () => {
   showSendMsgPopover.value = false
   showEmojiPopover.value = false

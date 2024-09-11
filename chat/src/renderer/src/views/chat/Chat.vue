@@ -5,6 +5,7 @@ import ContextMenu from '@imengyu/vue3-context-menu'
 import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css'
 import 'default-passive-events'
 import MessageSend from './MessageSend.vue'
+import ChatMessage from './ChatMessage.vue'
 // 获取当前实例的代理对象
 const { proxy } = getCurrentInstance()
 
@@ -156,7 +157,7 @@ const onLoadChatMessage = () => {
       messageCountInfo.maxMessageId = dataList.length > 0 ? dataList[dataList.length - 1].messageId : null
       //TODO滚动条滚动到最底部
     }
-    console.log(messageList.value)
+    // console.log(messageList.value)
   })
 }
 
@@ -173,6 +174,7 @@ onUnmounted(() => {
   window.ipcRenderer.removeAllListeners('loadSessionDataCallBack')
   window.ipcRenderer.removeAllListeners('loadChatMessage')
 })
+const showMediaDetailHandler = () => {}
 </script>
 
 <template>
@@ -203,7 +205,9 @@ onUnmounted(() => {
       <div class="chat-panel" v-show="Object.keys(currentChatSession).length > 0">
         <div class="message-panel" id="message-panel">
           <div class="message-item" v-for="(data, index) in messageList" :id="'message' + data.messageId">
-            {{ data.messageContent }}
+            <template v-if="data.messageType == 1 || data.messageType == 2 || data.messageType == 5">
+              <ChatMessage :data="data" :currentChatSession="currentChatSession"></ChatMessage>
+            </template>
           </div>
         </div>
         <MessageSend ref="messageSendRef" :currentChatSession="currentChatSession"> </MessageSend>
