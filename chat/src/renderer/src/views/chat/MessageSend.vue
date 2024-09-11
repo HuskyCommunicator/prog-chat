@@ -15,8 +15,21 @@ const showSendMsgPopover = ref(false)
 const showEmojiPopover = ref(false)
 const activeEmoji = ref('笑脸')
 const msgContent = ref()
-const fileLimit = 1
-
+const fileLimit = 10
+//文件个数超过指定值
+const uploadExceed = (files) => {
+  checkFileLimit(files)
+}
+const checkFileLimit = (files) => {
+  if (files.length > fileLimit) {
+    proxy.Confirm({
+      message: `一次最多可以上传10个文件`,
+      showCancelBtn: false
+    })
+    return
+  }
+  return true
+}
 // 定义关闭弹出框的函数
 const closePopover = () => {}
 
@@ -82,7 +95,6 @@ const sendMessageDo = async (
   // 设置消息的会话 ID 和发送用户 ID
   messageObj.sessionId = props.currentChatSession.sessionId
   messageObj.sendUserId = userInfoStore.getInfo().sendUserId
-
   // 请求服务器发送消息
   let result = await proxy.Request({
     url: proxy.Api.sendMessage,
@@ -166,6 +178,10 @@ const addContact = (contactId, code) => {
     contactType: code == 902 ? 'USER' : 'GROUP'
   })
 }
+const showEmojiPopoverHandler = () => {
+  showEmojiPopover.value = true
+}
+const pasteFile = () => {}
 </script>
 
 <template>

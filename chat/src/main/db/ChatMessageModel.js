@@ -87,4 +87,11 @@ const updateMessage = (data, paramData) => {
   return update('chat_message', data, paramData)
 }
 
-export { saveMessageBatch, selectMessageList, saveMessage, updateMessage }
+//
+const selectByMessageId = (messageId) => {
+  let sql = 'select * from chat_message where message_id = ? and user_id = ?'
+  const params = [messageId, store.getUserId()]
+  return queryOne(sql, params)
+}
+
+export { saveMessageBatch, selectMessageList, saveMessage, updateMessage, selectByMessageId }
