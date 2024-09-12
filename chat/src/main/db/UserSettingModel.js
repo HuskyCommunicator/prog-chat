@@ -1,6 +1,7 @@
 import { run, queryAll, queryOne, queryCount, insert, insertOrReplace, insertIgnore, update, deleteData } from './ADB'
 import store from '../store'
 import os from 'os'
+import { startLocalServer } from '../express'
 const fs = require('fs')
 const NODE_ENV = process.env.NODE_ENV
 const userDir = os.homedir()
@@ -45,7 +46,7 @@ const addUserSetting = async (userId, email) => {
   let sql = 'select max(server_port) server_port from user_setting'
   let { serverPort } = await queryOne(sql, [])
   if (serverPort == null) {
-    serverPort = 10240
+    serverPort = 10140
   } else {
     serverPort++
   }
@@ -76,6 +77,7 @@ const addUserSetting = async (userId, email) => {
     resultServerPort = serverPort
   }
   //TODO 启动本地服务
+  startLocalServer(serverPort)
   store.setUserData('localServerPort', resultServerPort)
   store.setUserData('localFileFolder', localFileFolder)
 }

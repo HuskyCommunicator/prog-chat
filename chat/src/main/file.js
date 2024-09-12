@@ -1,5 +1,4 @@
 const fs = require('fs')
-const fse = require('fs-extra')
 const NODE_ENV = process.env.NODE_ENV
 const path = require('path')
 const { app, ipcMain, shell } = require('electron')
@@ -10,8 +9,9 @@ import store from './store'
 import { selectByMessageId } from './db/ChatMessageModel'
 import { log } from 'console'
 const moment = require('moment')
-moment.locale('zh-cn', {})
+
 const { dialog } = require('electron')
+moment.locale('zh-cn', {})
 
 //获取域名
 const getDomain = () => {
@@ -175,4 +175,4 @@ const getLocalFilePath = (partType, showCover, fileId) => {
   })
 }
 
-export { saveFile2Local }
+export { saveFile2Local, getLocalFilePath }

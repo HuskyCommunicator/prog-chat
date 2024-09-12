@@ -29,7 +29,7 @@ const serverUrl = computed(() => {
   if (!props.fileId) {
     return
   }
-  return ''
+  return 'http://127.0.0.1:10242/file?partType=chat&fileId=256'
   //todo 获取本地服务的图片url
 })
 </script>

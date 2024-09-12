@@ -187,12 +187,22 @@ const onLoadChatMessage = () => {
     }
   })
 }
-
+//处理文件发送后更新
+const onAddLocalMessage = () => {
+  window.ipcRenderer.on('addLocalCallback', (e, { messageId, status }) => {
+    const findMessage = messageList.value.find((item) => {
+      if (item.messageId == messageId) {
+        return item
+      }
+    })
+    if (findMessage != null) {
+      findMessage.status = status
+    }
+  })
+}
 // 组件挂载时的初始化操作
 onMounted(() => {
-  loadChatSession()
-  onReceiveMessage()
-  onLoadSessionData(), onLoadChatMessage()
+  onReceiveMessage(), loadChatSession(), onLoadSessionData(), onLoadChatMessage(), onAddLocalMessage()
 })
 
 // 组件卸载时的清理操作
@@ -200,6 +210,7 @@ onUnmounted(() => {
   window.ipcRenderer.removeAllListeners('receiveChatMessage')
   window.ipcRenderer.removeAllListeners('loadSessionDataCallBack')
   window.ipcRenderer.removeAllListeners('loadChatMessage')
+  window.ipcRenderer.removeAllListeners('addLocalCallback')
 })
 const sendMessage4LocalHandler = (messageObj) => {
   // 将传入的消息对象添加到消息列表中

@@ -94,7 +94,7 @@ export const onAddLocalMessage = () => {
     data.lastReceiveTime = data.sendTime
     //TODO更新会话
     updateSessionInfo4Message(store.getUserData('currentSessionId'), data)
-    e.sender.send('addLocalCallBack', { status: 1, messageId: data.messageId })
+    e.sender.send('addLocalCallback', { messageId: data.messageId, status: 1 })
   })
 }
 
