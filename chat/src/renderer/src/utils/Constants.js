@@ -11,6 +11,7 @@ const File_TYPE = {
   rmvb: 1,
   mkv: 1,
   mov: 1,
+  hevc: 1,
   0: '图片',
   1: '视频',
   2: '文件'

@@ -14,5 +14,6 @@
 
   "editor.wordWrap": "wordWrapColumn",
   "editor.wordWrapColumn": 140,
-  "cSpell.customDictionaries": {} // 你可以根据需要修改这个值
+  "cSpell.customDictionaries": {},
+  "cSpell.ignoreWords": ["ffprobe"] // 你可以根据需要修改这个值
 }
