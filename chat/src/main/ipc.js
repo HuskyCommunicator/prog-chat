@@ -36,7 +36,7 @@ export const onSetLocalStore = () => {
 // 获取本地存储数据
 export const onGetLocalStore = () => {
   ipcMain.on('getLocalStore', (e, key) => {
-    e.sender.send('getLocalStoreCallBack', '主进程返回的内容:', store.getData(key))
+    e.sender.send('getLocalStoreCallback', store.getData(key))
   })
 }
 
@@ -92,6 +92,7 @@ export const onAddLocalMessage = () => {
 
     //更新session
     data.lastReceiveTime = data.sendTime
+
     //TODO更新会话
     updateSessionInfo4Message(store.getUserData('currentSessionId'), data)
     e.sender.send('addLocalCallback', { messageId: data.messageId, status: 1 })

@@ -1,30 +1,30 @@
 <script setup>
-import ShowLocalImage from "./ShowLocalImage.vue";
-import { ref, reactive, getCurrentInstance, nextTick } from "vue";
-const { proxy } = getCurrentInstance();
+import ShowLocalImage from './ShowLocalImage.vue'
+import { ref, reactive, getCurrentInstance, nextTick } from 'vue'
+const { proxy } = getCurrentInstance()
 const props = defineProps({
   userId: {
-    type: String,
+    type: String
   },
   width: {
     type: Number,
-    default: 40,
+    default: 40
   },
   borderRadius: {
     type: Number,
-    default: 0,
+    default: 0
   },
   showDetail: {
     type: Boolean,
-    default: false,
-  },
-});
+    default: false
+  }
+})
 const showDetailHandler = () => {
   if (!props.showDetail) {
-    return;
+    return
   }
   //todo 查看图片详情
-};
+}
 </script>
 
 <template>
@@ -34,15 +34,10 @@ const showDetailHandler = () => {
     :style="{
       width: width + 'px',
       height: width + 'px',
-      'border-radius': borderRadius + 'px',
+      'border-radius': borderRadius + 'px'
     }"
   >
-    <ShowLocalImage
-      :width="width"
-      :fileId="userId"
-      partType="avatar"
-      :forceGet="true"
-    ></ShowLocalImage>
+    <ShowLocalImage :width="width" :fileId="userId" partType="avatar" :forceGet="true"></ShowLocalImage>
   </div>
 </template>
 

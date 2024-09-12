@@ -14,6 +14,8 @@ const uploadImage = async (file) => {
 const preview = computed(() => {
   return props.modelValue instanceof File
 })
+// console.log(props.modelValue)
+
 //TODO 文件上传
 </script>
 

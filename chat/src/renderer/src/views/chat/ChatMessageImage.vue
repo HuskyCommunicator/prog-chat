@@ -11,7 +11,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <div><ShowLocalImage :fileId="data.fileId" partType="chat" :fileType="data.fileType"></ShowLocalImage></div>
+  <div><ShowLocalImage :fileId="data.messageId" partType="chat" :fileType="data.fileType"></ShowLocalImage></div>
 </template>
 
 <style lang="scss" scoped></style>

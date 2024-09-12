@@ -56,7 +56,13 @@ const props = defineProps({
       </div>
       <template v-else>
         <div class="content" v-html="data.messageContent" v-if="data.messageType != 5"></div>
-        <div class="content" v-else>媒体消息</div>
+        <div class="content" v-else>
+          <template v-if="data.fileType == 0">
+            <ChatMessageImage :data="data"></ChatMessageImage>
+          </template>
+          <template v-if="data.fileType == 1">媒体消息</template>
+          <template v-if="data.fileType == 2">文件消息</template>
+        </div>
       </template>
     </div>
   </div>

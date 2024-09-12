@@ -70,11 +70,6 @@ const submitApply = async () => {
 const show = (data) => {
   dialogConfig.show = true
   const userInfo = userInfoStore.getInfo()
-  if (userInfo && userInfo.nickName) {
-    console.log(userInfo.nickName)
-  } else {
-    console.log('nickName is undefined')
-  }
   nextTick(() => {
     formDataRef.value.resetFields()
     formData.value = Object.assign({}, data)

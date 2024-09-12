@@ -145,7 +145,12 @@ const getLocalFilePath = (partType, showCover, fileId) => {
 
     // 根据partType判断处理逻辑
     if (partType == 'avatar') {
-      // 如果partType是'avatar'，这里可以添加处理逻辑
+      // 如果partType是'avatar'，获取头像路径
+      localFolder = localFolder + '/avatar/'
+      if (!fs.existsSync(localFolder)) {
+        mkdirs(localFolder)
+      }
+      localPath = localFolder + fileId + image_suffix
     } else if (partType == 'chat') {
       // 如果partType是'chat'，获取消息信息
       let messageInfo = await selectByMessageId(fileId)
@@ -159,7 +164,7 @@ const getLocalFilePath = (partType, showCover, fileId) => {
         mkdirs(localFolder)
       }
 
-      // // 获取文件后缀名?
+      //  获取文件后缀名
       let fileSuffix = messageInfo.fileName
       fileSuffix = fileSuffix.substring(fileSuffix.lastIndexOf('.'))
       if (fileSuffix === '.hevc') {
@@ -174,4 +179,63 @@ const getLocalFilePath = (partType, showCover, fileId) => {
   })
 }
 
-export { saveFile2Local, getLocalFilePath }
+//下载头像
+const downloadFile = (fileId, showCover, savePath, partType) => {
+  // 将 showCover 转换为字符串
+  showCover = showCover + ''
+  // 定义下载文件的 URL
+  let url = `${getDomain()}/api/chat/downloadFile`
+  // 获取用户的 token
+  const token = store.getUserData('token')
+  // 返回一个新的 Promise 对象
+  return new Promise(async (resolve, reject) => {
+    // 配置请求的参数
+    const config = {
+      responseType: 'stream', // 设置响应类型为流
+      headers: {
+        'content-type': 'multipart/form-data', // 设置请求头的内容类型
+        token: token // 设置请求头的 token
+      }
+    }
+    // 发送 POST 请求以下载文件
+    let response = await axios.post(
+      url,
+      {
+        fileId, // 文件 ID
+        showCover // 是否显示封面
+      },
+      config // 请求配置
+    )
+    // 获取保存路径的文件夹路径
+    const folder = savePath.substring(0, savePath.lastIndexOf('/'))
+    // 创建文件夹
+    mkdirs(folder)
+    // 创建写入流
+    const stream = fs.createWriteStream(savePath)
+    // 如果响应的内容类型是 JSON
+    if (response.headers['content-type'] === 'application/json') {
+      // 获取资源路径
+      let resourcesPath = getResourcesPath()
+      // 如果 partType 是 'avatar'
+      if (partType == 'avatar') {
+        // 读取默认用户头像并写入流
+        fs.createReadStream(resourcesPath + '/assets/user.png').pipe(stream)
+      } else {
+        // 读取 404 图片并写入流
+        fs.createReadStream(resourcesPath + '/assets/404.png').pipe(stream)
+      }
+    } else {
+      // 将响应数据写入流
+      response.data.pipe(stream)
+    }
+    // 当写入完成时
+    stream.on('finish', () => {
+      // 关闭流
+      stream.close()
+      // 解析 Promise
+      resolve()
+    })
+  })
+}
+
+export { saveFile2Local, getLocalFilePath, downloadFile }

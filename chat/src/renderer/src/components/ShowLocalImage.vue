@@ -1,5 +1,7 @@
 <script setup>
 import { ref, reactive, getCurrentInstance, nextTick, computed } from 'vue'
+import { useGlobalInfoStore } from '@/stores/GlobalInfoStore'
+const globalInfoStore = useGlobalInfoStore()
 const { proxy } = getCurrentInstance()
 const props = defineProps({
   width: {
@@ -18,7 +20,9 @@ const props = defineProps({
     default: 'avatar'
   },
   fileType: {
-    type: Number
+    type: Number,
+    default: 0
+    //TO ASK 如果是其他文件呢
   },
   forceGet: {
     type: Boolean,
@@ -29,8 +33,9 @@ const serverUrl = computed(() => {
   if (!props.fileId) {
     return
   }
-  return 'http://127.0.0.1:10242/file?partType=chat&fileId=258'
-  //todo 获取本地服务的图片url
+  const serverPort = globalInfoStore.getInfo('localServerPort')
+  let imgFile = `http://localhost:${serverPort}/file?fileId=${props.fileId}&partType=${props.partType}&fileType=${props.fileType}&showCover=true&forceGet=${props.forceGet}&${new Date().getTime()}`
+  return imgFile
 })
 </script>
 

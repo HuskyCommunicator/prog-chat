@@ -2,7 +2,8 @@
 const express = require('express')
 const expressServer = express()
 const fs = require('fs')
-import { getLocalFilePath } from './file'
+import store from './store'
+import { downloadFile, getLocalFilePath } from './file'
 
 // 添加中间件来解析 JSON 请求体
 expressServer.use(express.json())
@@ -22,12 +23,15 @@ const FILE_TYPE_CONTENT_TYPE = {
   1: 'video/',
   default: 'application/octet-stream'
 }
+//缩略图后缀
+const cover_image_suffix = '_cover.png'
+const image_suffix = '.png'
 
 //
 expressServer.get('/file', async (req, res) => {
   let { partType, fileType, fileId, showCover, forceGet } = req.query
   //如果没有指定partType或fileId，则返回错误
-  if (!partType || !fileId) {
+  if (!partType || !fileId || !fileType) {
     return res.status(400).send('请求参数错误')
   }
   //确保 showCover 始终是一个布尔值
@@ -36,19 +40,16 @@ expressServer.get('/file', async (req, res) => {
   //在文件不存在或需要强制下载时，执行文件下载操作
   if (!fs.existsSync(localPath) || forceGet == 'true') {
     //获取头像原图
-    await downloadFile()
+    await downloadFile(fileId, true, localPath + cover_image_suffix, partType)
     if (forceGet == 'true' && partType == 'avatar') {
       //获取头像缩略图
-      await downloadFile()
+      await downloadFile(fileId, showCover, localPath, partType)
     }
   }
   // 获取文件的后缀名
   const fileSuffix = localPath.substring(localPath.lastIndexOf('.') + 1)
   // 根据文件类型和后缀名生成内容类型
   let contentType = FILE_TYPE_CONTENT_TYPE[fileType] + fileSuffix
-  console.log('fileSuffix', fileSuffix)
-  console.log('fileType', fileType)
-  console.log('contentType', contentType)
   // 设置响应头，允许所有来源的跨域请求
   res.setHeader('Access-Control-Allow-Origin', '*')
   // 设置响应头，指定内容类型
@@ -57,11 +58,6 @@ expressServer.get('/file', async (req, res) => {
   fs.createReadStream(localPath).pipe(res)
   return 1
 })
-
-//下载头像
-const downloadFile = () => {
-  return 1
-}
 
 //关闭express服务
 const closeLocalServer = () => {
