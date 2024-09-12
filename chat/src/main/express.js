@@ -26,8 +26,6 @@ const FILE_TYPE_CONTENT_TYPE = {
 //
 expressServer.get('/file', async (req, res) => {
   let { partType, fileType, fileId, showCover, forceGet } = req.query
-  console.log(partType, fileId)
-
   //如果没有指定partType或fileId，则返回错误
   if (!partType || !fileId) {
     return res.status(400).send('请求参数错误')
@@ -48,6 +46,9 @@ expressServer.get('/file', async (req, res) => {
   const fileSuffix = localPath.substring(localPath.lastIndexOf('.') + 1)
   // 根据文件类型和后缀名生成内容类型
   let contentType = FILE_TYPE_CONTENT_TYPE[fileType] + fileSuffix
+  console.log('fileSuffix', fileSuffix)
+  console.log('fileType', fileType)
+  console.log('contentType', contentType)
   // 设置响应头，允许所有来源的跨域请求
   res.setHeader('Access-Control-Allow-Origin', '*')
   // 设置响应头，指定内容类型

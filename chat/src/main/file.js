@@ -7,7 +7,6 @@ const FormData = require('form-data') // 引入FormData模块（用于构建表�
 const axios = require('axios') // 引入axios库
 import store from './store'
 import { selectByMessageId } from './db/ChatMessageModel'
-import { log } from 'console'
 const moment = require('moment')
 
 const { dialog } = require('electron')
@@ -163,11 +162,11 @@ const getLocalFilePath = (partType, showCover, fileId) => {
       // // 获取文件后缀名?
       let fileSuffix = messageInfo.fileName
       fileSuffix = fileSuffix.substring(fileSuffix.lastIndexOf('.'))
-      if (fileSuffix == '.hevc') {
+      if (fileSuffix === '.hevc') {
         fileSuffix = '.mp4'
       }
       // 生成本地文件路径
-      localPath = localFolder + '\\' + fileId + '.mp4'
+      localPath = localFolder + '\\' + fileId + fileSuffix
     }
 
     // 解析本地路径
