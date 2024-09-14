@@ -16,6 +16,13 @@ const props = defineProps({
     default: {}
   }
 })
+const emit = defineEmits(['showMediaDetail'])
+const showDetail = () => {
+  if (props.data.status == 0) {
+    return
+  }
+  emit('showMediaDetail', props.data.messageId)
+}
 </script>
 
 <template>
@@ -32,13 +39,13 @@ const props = defineProps({
         <div class="content" v-html="data.messageContent" v-if="data.messageType != 5"></div>
         <div class="content" v-else>
           <template v-if="data.fileType == 0">
-            <ChatMessageImage :data="data"></ChatMessageImage>
+            <ChatMessageImage :data="data" @click="showDetail"></ChatMessageImage>
           </template>
           <template v-if="data.fileType == 1">
-            <ChatMessageVideo :data="data"></ChatMessageVideo>
+            <ChatMessageVideo :data="data" @click="showDetail"></ChatMessageVideo>
           </template>
           <template v-if="data.fileType == 2">
-            <ChatMessageFile :data="data"></ChatMessageFile>
+            <ChatMessageFile :data="data" @click="showDetail"></ChatMessageFile>
           </template>
         </div>
       </template>
@@ -64,13 +71,13 @@ const props = defineProps({
         <div class="content" v-html="data.messageContent" v-if="data.messageType != 5"></div>
         <div class="content" v-else>
           <template v-if="data.fileType == 0">
-            <ChatMessageImage :data="data"></ChatMessageImage>
+            <ChatMessageImage :data="data" @click="showDetail"></ChatMessageImage>
           </template>
           <template v-if="data.fileType == 1">
-            <ChatMessageVideo :data="data"></ChatMessageVideo>
+            <ChatMessageVideo :data="data" @click="showDetail"></ChatMessageVideo>
           </template>
           <template v-if="data.fileType == 2">
-            <ChatMessageFile :data="data"></ChatMessageFile>
+            <ChatMessageFile :data="data" @click="showDetail"></ChatMessageFile>
           </template>
         </div>
       </template>

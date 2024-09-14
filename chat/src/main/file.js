@@ -57,9 +57,6 @@ const saveFile2Local = async (messageId, filePath, fileType) => {
     let ffmpegPath = getFFmegPath()
     let savePath = await getLocalFilePath('chat', false, messageId)
     let coverPath = null
-    // console.log('filePath:', filePath)
-    // console.log('savePath:', savePath)
-
     fs.copyFileSync(filePath, savePath)
     //生成缩略图
     if (fileType != 2) {
@@ -192,8 +189,6 @@ const downloadFile = (fileId, showCover, savePath, partType) => {
     )
     // 获取保存路径的文件夹路径
     const folder = savePath.substring(0, savePath.lastIndexOf('/'))
-    console.log('savePath', savePath)
-    console.log('folder', folder)
     // 创建文件夹
     mkdirs(folder)
     // 创建写入流

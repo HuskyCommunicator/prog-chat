@@ -2,7 +2,7 @@
 import { app, shell, BrowserWindow, ipcMain, Menu, Tray } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon.png?asset'
+
 import {
   onLoginOrRegister,
   onLoginSuccess,
@@ -15,12 +15,17 @@ import {
   onLoadChatMessage,
   onAddLocalMessage,
   onCreateCover,
-  onSetSession
+  onSetSession,
+  onOpenNewWindow
 } from './ipc.js'
 import './wsClient.js'
 import { createTable } from './db/ADB.js'
 import { winTitle } from '../utils/winTitle.js'
 //import { tray } from '../utils/tray.js'
+import { saveWindow } from '../utils/window/windowProxy.js'
+const { nativeImage } = require('electron')
+const icon = nativeImage.createFromPath('../../resources/icon.png')
+
 const NODE_ENV = process.env.NODE_ENV
 const login_width = 300
 const login_height = 370
@@ -45,6 +50,7 @@ function createWindow() {
       contextIsolation: false
     }
   })
+  saveWindow('main', mainWindow)
   //打开调试工具
   mainWindow.webContents.openDevTools()
   // 当窗口准备好显示时，显示窗口
@@ -129,8 +135,8 @@ function createWindow() {
   onLoadChatMessage()
   onAddLocalMessage()
   onCreateCover()
-
   onSetSession()
+  onOpenNewWindow()
 }
 
 // 当Electron完成初始化并准备创建浏览器窗口时，将调用此方法

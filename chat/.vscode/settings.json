@@ -8,7 +8,7 @@
   "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "cSpell.words": ["cascader", "iconfont", "okfun"],
+  "cSpell.words": ["cascader", "dplayer", "fullscreenable", "iconfont", "maximizable", "okfun", "viewerjs"],
   "editor.fontLigatures": false,
   "cSpell.languageSettings": [],
 
