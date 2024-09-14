@@ -4,7 +4,7 @@ import { initWs } from './wsClient.js'
 import { addUserSetting } from './db/UserSettingModel.js'
 import { delChatSession, readAll, selectUserSessionList, topChatSession, updateSessionInfo4Message } from './db/ChatSessionUserModel.js'
 import { saveMessage, selectMessageList, updateMessage } from './db/ChatMessageModel.js'
-import { saveFile2Local } from './file.js'
+import { createCover, saveFile2Local } from './file.js'
 // 处理登录或注册事件
 export const onLoginOrRegister = (callback) => {
   ipcMain.on('loginOrRegister', (e, isLogin) => {
@@ -110,3 +110,28 @@ export const onSetSession = () => {
     }
   })
 }
+
+//生成缩略图
+export const onCreateCover = () => {
+  ipcMain.on('createCover', async (e, localFilePath) => {
+    console.log('主进程收到消息')
+
+    const stream = await createCover(localFilePath)
+    console.log('主进程向渲染进程传递')
+    e.sender.send('createCoverCallback', stream)
+  })
+}
+// export {
+//   onLoginOrRegister,
+//   onLoginSuccess,
+//   onSetLocalStore,
+//   onGetLocalStore,
+//   winTitleOp,
+//   onLoadSessionData,
+//   onDelChatSession,
+//   onTopChatSession,
+//   onLoadChatMessage,
+//   onAddLocalMessage,
+//   onSetSession,
+//   onCreateCover
+// }

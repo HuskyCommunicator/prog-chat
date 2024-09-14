@@ -60,7 +60,8 @@ onMounted(() => {
   <div class="main">
     <!-- 左侧边栏 -->
     <div class="left-sider">
-      <div></div>
+      <Avatar :userId="userInfoStore.getInfo().userId" :width="35" :showDetail="false"></Avatar>
+
       <!-- 上菜单列表 -->
       <div class="menu-list">
         <template v-for="item in menuList">

@@ -2,13 +2,14 @@
 const express = require('express')
 const expressServer = express()
 const fs = require('fs')
+const cors = require('cors')
 import store from './store'
 import { downloadFile, getLocalFilePath } from './file'
 
 // 添加中间件来解析 JSON 请求体
 expressServer.use(express.json())
 expressServer.use(express.urlencoded({ extended: true }))
-
+expressServer.use(cors())
 //启动express服务
 let server = null
 const startLocalServer = (serverPort) => {
@@ -30,33 +31,50 @@ const image_suffix = '.png'
 //
 expressServer.get('/file', async (req, res) => {
   let { partType, fileType, fileId, showCover, forceGet } = req.query
-  //如果没有指定partType或fileId，则返回错误
-  if (!partType || !fileId || !fileType) {
+  // console.log('Request received:', { partType, fileType, fileId, showCover, forceGet })
+
+  // 如果没有指定partType或fileId，则返回错误
+  if (!partType || !fileId) {
     return res.status(400).send('请求参数错误')
   }
-  //确保 showCover 始终是一个布尔值
+
+  // 确保 showCover 始终是一个布尔值
   showCover = showCover == undefined ? false : Boolean(showCover)
   const localPath = await getLocalFilePath(partType, showCover, fileId)
-  //在文件不存在或需要强制下载时，执行文件下载操作
+  // console.log('Local path:', localPath)
+
+  // 在文件不存在或需要强制下载时，执行文件下载操作
   if (!fs.existsSync(localPath) || forceGet == 'true') {
-    //获取头像原图
-    await downloadFile(fileId, true, localPath + cover_image_suffix, partType)
+    //  console.log('File does not exist or forceGet is true, downloading file...')
+    // 获取头像原图
+    await downloadFile(fileId, showCover, localPath, partType)
     if (forceGet == 'true' && partType == 'avatar') {
-      //获取头像缩略图
-      await downloadFile(fileId, showCover, localPath, partType)
+      // 获取头像缩略图
+      await downloadFile(fileId, true, localPath + cover_image_suffix, partType)
     }
   }
+
   // 获取文件的后缀名
   const fileSuffix = localPath.substring(localPath.lastIndexOf('.') + 1)
+  // console.log('File suffix:', fileSuffix)
+
   // 根据文件类型和后缀名生成内容类型
   let contentType = FILE_TYPE_CONTENT_TYPE[fileType] + fileSuffix
+  //console.log('Content type:', contentType)
+
   // 设置响应头，允许所有来源的跨域请求
   res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+
   // 设置响应头，指定内容类型
   res.setHeader('Content-Type', contentType)
+
   // 创建文件读取流，并将其内容通过响应管道发送给客户端
-  fs.createReadStream(localPath).pipe(res)
-  return 1
+  if (showCover || fileType != '1') {
+    fs.createReadStream(localPath).pipe(res)
+    return
+  }
 })
 
 //关闭express服务

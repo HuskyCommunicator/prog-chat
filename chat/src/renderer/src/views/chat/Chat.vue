@@ -131,6 +131,8 @@ const onReceiveMessage = () => {
   // 监听 'receiveChatMessage' 事件
   window.ipcRenderer.on('receiveChatMessage', (e, message) => {
     // 打印接收到的消息，用于调试
+    console.log(message)
+
     // 在 chatSessionList 中查找与接收到的消息的 sessionId 匹配的会话
     let curSession = chatSessionList.value.find((item) => {
       return item.sessionId == message.sessionId

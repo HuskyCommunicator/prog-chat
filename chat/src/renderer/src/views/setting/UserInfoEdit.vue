@@ -4,7 +4,8 @@ import AreaSelect from '@/components/AreaSelect.vue' // 导入区域选择组件
 import { useUserInfoStore } from '@/stores/UserInfoStore'
 const userInfoStore = useUserInfoStore()
 const { proxy } = getCurrentInstance() // 获取当前实例的代理对象
-
+import { useAvatarUpdateStore } from '@/stores/AvatarUpdateStore'
+const avatarUpdateStore = useAvatarUpdateStore()
 // 定义组件的属性
 const props = defineProps({
   data: {
@@ -33,7 +34,7 @@ const rules = {
 }
 const saveCover = ({ avatarFile, coverFile }) => {
   formData.value.avatarFile = avatarFile // 将上传的头像文件赋值给 formData.value.avatarFile
-  formData.value.coverFile = coverFile // 将上传的封面文件赋值给 formData.value.coverFile
+  formData.value.avatarCover = coverFile // 将上传的封面文件赋值给 formData.value.coverFile
 }
 const saveUserInfo = () => {
   formDataRef.value.validate(async (valid) => {
@@ -45,8 +46,9 @@ const saveUserInfo = () => {
     if (params.area) {
       params.areaName = params.area.areaName.join(',')
       params.areaCode = params.area.areaCode.join(',')
+      delete params.area
     }
-    //TODO 强制刷新头像
+    avatarUpdateStore.setForceReload(userInfoStore.getInfo().userId, false)
     let result = await proxy.Request({
       url: proxy.Api.saveUserInfo,
       params
@@ -56,7 +58,8 @@ const saveUserInfo = () => {
     }
     proxy.Message.success('保存成功')
     userInfoStore.setInfo(result.data)
-    //TODO 强制更新头像
+    avatarUpdateStore.setForceReload(userInfoStore.getInfo().userId, true)
+
     emit('editBack')
   })
 }

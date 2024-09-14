@@ -7,11 +7,11 @@ const userInfoStore = useUserInfoStore()
 const props = defineProps({
   data: {
     type: Object,
-    default: () => ({})
+    default: {}
   },
   currentChatSession: {
     type: Object,
-    default: () => ({})
+    default: {}
   }
 })
 </script>
@@ -60,8 +60,8 @@ const props = defineProps({
           <template v-if="data.fileType == 0">
             <ChatMessageImage :data="data"></ChatMessageImage>
           </template>
-          <template v-if="data.fileType == 1">媒体消息</template>
-          <template v-if="data.fileType == 2">文件消息</template>
+          <template v-if="data.fileType == 1"> 媒体 </template>
+          <template v-if="data.fileType == 2"> 文件 </template>
         </div>
       </template>
     </div>

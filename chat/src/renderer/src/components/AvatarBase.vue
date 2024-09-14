@@ -1,6 +1,8 @@
 <script setup>
 import ShowLocalImage from './ShowLocalImage.vue'
 import { ref, reactive, getCurrentInstance, nextTick } from 'vue'
+import { useAvatarUpdateStore } from '@/stores/AvatarUpdateStore'
+const avatarUpdateStore = useAvatarUpdateStore()
 const { proxy } = getCurrentInstance()
 const props = defineProps({
   userId: {
@@ -37,7 +39,7 @@ const showDetailHandler = () => {
       'border-radius': borderRadius + 'px'
     }"
   >
-    <ShowLocalImage :width="width" :fileId="userId" partType="avatar" :forceGet="true"></ShowLocalImage>
+    <ShowLocalImage :width="width" :fileId="userId" partType="avatar" :forceGet="avatarUpdateStore.getForceReload(userId)"></ShowLocalImage>
   </div>
 </template>
 
