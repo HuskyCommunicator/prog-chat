@@ -3,6 +3,8 @@ import { ref, reactive, getCurrentInstance, nextTick } from 'vue'
 const { proxy } = getCurrentInstance()
 import { useUserInfoStore } from '@/stores/UserInfoStore'
 import ChatMessageImage from './chatMessageImage.vue'
+import ChatMessageVideo from './chatMessageVideo.vue'
+import ChatMessageFile from './chatMessageFile.vue'
 const userInfoStore = useUserInfoStore()
 const props = defineProps({
   data: {
@@ -32,8 +34,12 @@ const props = defineProps({
           <template v-if="data.fileType == 0">
             <ChatMessageImage :data="data"></ChatMessageImage>
           </template>
-          <template v-if="data.fileType == 1">媒体消息</template>
-          <template v-if="data.fileType == 2">文件消息</template>
+          <template v-if="data.fileType == 1">
+            <ChatMessageVideo :data="data"></ChatMessageVideo>
+          </template>
+          <template v-if="data.fileType == 2">
+            <ChatMessageFile :data="data"></ChatMessageFile>
+          </template>
         </div>
       </template>
     </div>
@@ -60,8 +66,12 @@ const props = defineProps({
           <template v-if="data.fileType == 0">
             <ChatMessageImage :data="data"></ChatMessageImage>
           </template>
-          <template v-if="data.fileType == 1"> 媒体 </template>
-          <template v-if="data.fileType == 2"> 文件 </template>
+          <template v-if="data.fileType == 1">
+            <ChatMessageVideo :data="data"></ChatMessageVideo>
+          </template>
+          <template v-if="data.fileType == 2">
+            <ChatMessageFile :data="data"></ChatMessageFile>
+          </template>
         </div>
       </template>
     </div>

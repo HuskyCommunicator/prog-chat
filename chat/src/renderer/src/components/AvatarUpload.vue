@@ -10,7 +10,6 @@ const props = defineProps({
 const localFile = ref(null)
 const emit = defineEmits(['coverFile'])
 const uploadImage = async (file) => {
-  console.log('图像选择完成,向主进程发送消息')
   file = file.file
   window.ipcRenderer.send('createCover', file.path)
 }
@@ -19,8 +18,6 @@ const preview = computed(() => {
 })
 onMounted(() => {
   window.ipcRenderer.on('createCoverCallback', (e, { avatarStream, coverStream }) => {
-    console.log('渲染进程收到缩略图消息')
-
     const coverBlob = new Blob([coverStream], { type: 'image/png' })
     const coverFile = new File([coverBlob], 'thumbnail.jpg')
 

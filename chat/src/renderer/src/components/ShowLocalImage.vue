@@ -8,6 +8,9 @@ const props = defineProps({
     type: Number,
     default: 170
   },
+  height: {
+    type: Number
+  },
   showPlay: {
     type: Boolean,
     default: false
@@ -38,10 +41,16 @@ const serverUrl = computed(() => {
   return imgFile
 })
 </script>
-
 <template>
   <div class="image-panel" @click="showImageHandler">
-    <el-image :src="serverUrl" fit="scale-down" :width="width"></el-image>
+    <el-image :src="serverUrl" fit="scale-down" :width="width">
+      <template #error>
+        <div class="iconfont icon-image-error"></div>
+      </template>
+    </el-image>
+    <div class="play-panel" v-if="showPlay">
+      <span class="iconfont icon-video-play"></span>
+    </div>
   </div>
 </template>
 

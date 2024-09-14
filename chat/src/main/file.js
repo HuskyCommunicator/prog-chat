@@ -7,10 +7,7 @@ const FormData = require('form-data') // 引入FormData模块（用于构建表�
 const axios = require('axios') // 引入axios库
 import store from './store'
 import { selectByMessageId } from './db/ChatMessageModel'
-import { log } from 'console'
 const moment = require('moment')
-
-const { dialog } = require('electron')
 moment.locale('zh-cn', {})
 
 //获取域名
@@ -60,13 +57,12 @@ const saveFile2Local = async (messageId, filePath, fileType) => {
     let ffmpegPath = getFFmegPath()
     let savePath = await getLocalFilePath('chat', false, messageId)
     let coverPath = null
+    // console.log('filePath:', filePath)
+    // console.log('savePath:', savePath)
+
     fs.copyFileSync(filePath, savePath)
     //生成缩略图
     if (fileType != 2) {
-      console.log('ffmpegPath', ffmpegPath, 'ffprobePath', getFFprobePath())
-      // console.log('filePath', filePath, 'savePath', savePath)
-      console.log('coverPath', coverPath)
-
       //判断视频格式
       let command = `${getFFprobePath()} -v error -select_streams v:0 -show_entries stream=codec_name "${filePath}"`
       let result = await execCommand(command)
@@ -79,6 +75,9 @@ const saveFile2Local = async (messageId, filePath, fileType) => {
       }
       //生成缩略图
       coverPath = savePath + cover_image_suffix
+      // console.log('savePath:', savePath)
+      // console.log('coverPath', coverPath)
+
       command = `${ffmpegPath} -i "${savePath}" -y -vframes 1 -vf "scale=min(170\\,iw*min(170/iw\\,170/ih)):min(170\\,ih*min(170/iw\\,170/ih))" "${coverPath}"`
       await execCommand(command)
     }
@@ -159,7 +158,9 @@ const getLocalFilePath = async (partType, showCover, fileId) => {
       // 生成本地文件路径
       localPath = localFolder + '\\' + fileId + fileSuffix
     }
-
+    if (showCover) {
+      localPath = localPath + cover_image_suffix
+    }
     // 解析本地路径
     resolve(localPath)
   })
@@ -191,21 +192,23 @@ const downloadFile = (fileId, showCover, savePath, partType) => {
     )
     // 获取保存路径的文件夹路径
     const folder = savePath.substring(0, savePath.lastIndexOf('/'))
+    console.log('savePath', savePath)
+    console.log('folder', folder)
     // 创建文件夹
     mkdirs(folder)
     // 创建写入流
     const stream = fs.createWriteStream(savePath)
     // 如果响应的内容类型是 JSON
-    if (response.headers['Content-type'] === 'application/json') {
+    if (response.headers['content-type'] === 'application/json') {
       // 获取资源路径
       let resourcesPath = getResourcesPath()
       // 如果 partType 是 'avatar'
       if (partType == 'avatar') {
         // 读取默认用户头像并写入流
-        fs.createReadStream(resourcesPath + 'assets/user.png').pipe(stream)
+        fs.createReadStream(resourcesPath + '/assets/user.png').pipe(stream)
       } else {
         // 读取 404 图片并写入流
-        fs.createReadStream(resourcesPath + 'assets/404.png').pipe(stream)
+        fs.createReadStream(resourcesPath + '/assets/404.png').pipe(stream)
       }
     } else {
       // 将响应数据写入流
@@ -224,8 +227,6 @@ const downloadFile = (fileId, showCover, savePath, partType) => {
 //创建封面
 const createCover = (filePath) => {
   return new Promise(async (resolve, reject) => {
-    console.log(filePath)
-
     let ffmpegPath = getFFmegPath()
     let avatarPath = await getLocalFilePath('avatar', false, store.getUserId() + '_temp')
     let command = `${ffmpegPath} -i "${filePath}" "${avatarPath}" -y`

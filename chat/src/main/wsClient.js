@@ -1,9 +1,8 @@
 import { WebSocket } from 'ws'
 import store from './store'
 import { saveOrUpdate4Message, saveOrUpdateChatSessionBatch4Init, selectUserSessionByContactId } from './db/ChatSessionUserModel'
-import { saveMessage, saveMessageBatch } from './db/ChatMessageModel'
+import { saveMessage, saveMessageBatch, updateMessage } from './db/ChatMessageModel'
 import { updateContactNoReadCount } from './db/UserSettingModel'
-import { messageTypes } from 'element-plus/lib/components/index.js'
 const NODE_ENV = process.env.NODE_ENV
 let ws = null
 let maxReConnectTimes = null
@@ -58,7 +57,12 @@ const createWs = () => {
         //发送消息
         sender.send('receiveChatMessage', { messageType: message.messageType })
         break
-      case 2:
+      case 6: //文件上传完成
+        updateMessage({ status: message.status }, { messageId: message.messageId })
+        sender.send('receiveChatMessage', message)
+        break
+      case 2: //聊天消息
+      case 5: //视频图片消息
         if (message.sendUserId == store.getUserId() && message.contactType == 1) {
           break
         }

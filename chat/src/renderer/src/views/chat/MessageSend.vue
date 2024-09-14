@@ -10,11 +10,8 @@ const userInfoStore = useUserInfoStore()
 // 获取当前实例的代理
 const { proxy } = getCurrentInstance()
 
-// 定义响应式变量
-const showSendMsgPopover = ref(false)
-const showEmojiPopover = ref(false)
 const activeEmoji = ref('笑脸')
-const msgContent = ref()
+const msgContent = ref('')
 const fileLimit = 10
 //文件个数超过指定值
 const uploadExceed = (files) => {
@@ -30,20 +27,9 @@ const checkFileLimit = (files) => {
   }
   return true
 }
-// 定义关闭弹出框的函数
-const closePopover = () => {}
-
-// 定义打开弹出框的函数
-const openPopover = () => {}
 
 // 定义事件发射器
 const emit = defineEmits(['sendMessage4Local'])
-
-// 隐藏弹出框的函数
-const hidePopover = () => {
-  showSendMsgPopover.value = false
-  showEmojiPopover.value = false
-}
 
 // 定义组件的 props
 const props = defineProps({
@@ -178,10 +164,32 @@ const addContact = (contactId, code) => {
     contactType: code == 902 ? 'USER' : 'GROUP'
   })
 }
+
+const pasteFile = () => {}
+
+//表情相关
+const sendEmoji = (emoji) => {
+  msgContent.value = msgContent.value + emoji
+  showEmojiPopover.value = false
+}
+
 const showEmojiPopoverHandler = () => {
   showEmojiPopover.value = true
 }
-const pasteFile = () => {}
+
+const showSendMsgPopover = ref(false)
+const showEmojiPopover = ref(false)
+
+const hidePopover = () => {
+  showSendMsgPopover.value = false
+  showEmojiPopover.value = false
+}
+const openPopover = () => {
+  document.addEventListener('click', hidePopover, false)
+}
+const closePopover = () => {
+  document.removeEventListener('click', hidePopover, false)
+}
 </script>
 
 <template>

@@ -131,8 +131,17 @@ const onReceiveMessage = () => {
   // 监听 'receiveChatMessage' 事件
   window.ipcRenderer.on('receiveChatMessage', (e, message) => {
     // 打印接收到的消息，用于调试
-    console.log(message)
-
+    if (message.messageType == 6) {
+      const localMessage = messageList.value.find((item) => {
+        if (item.messageId == message.messageId) {
+          return item
+        }
+      })
+      if (localMessage != null) {
+        localMessage.status = 1
+      }
+      return
+    }
     // 在 chatSessionList 中查找与接收到的消息的 sessionId 匹配的会话
     let curSession = chatSessionList.value.find((item) => {
       return item.sessionId == message.sessionId
@@ -185,7 +194,7 @@ const onLoadChatMessage = () => {
     messageCountInfo.pageTotal = pageTotal
     if (pageNo == 1) {
       messageCountInfo.maxMessageId = dataList.length > 0 ? dataList[dataList.length - 1].messageId : null
-      goToBottom
+      goToBottom()
     }
   })
 }
@@ -294,6 +303,9 @@ const goToBottom = () => {
           </div>
         </div>
         <MessageSend ref="messageSendRef" :currentChatSession="currentChatSession" @sendMessage4Local="sendMessage4LocalHandler"> </MessageSend>
+      </div>
+      <div class="chat-blank" v-show="Object.keys(currentChatSession).length == 0">
+        <Blank></Blank>
       </div>
     </template>
   </Layout>
