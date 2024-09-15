@@ -14,10 +14,6 @@ const currentIndex = ref(0) // 定义一个响应式变量currentIndex，初始�
 const allFileList = ref([]) // 定义一个响应式变量allFileList，初始值为空数组
 const instance = ref(null) // 定义一个响应式变量instance，初始值为null
 
-// 定义函数
-const saveAs = () => {} // 定义一个空函数saveAs
-const next = (num) => {} // 定义一个空函数next，接收一个参数num
-
 // 图片展示选项
 const options = ref({
   inline: true, // 是否内联显示
@@ -90,10 +86,9 @@ const initPlayer = () => {
 }
 
 const getCurrentFile = () => {
+  //如果视频在播放时切换到图片仍会播放,手动判断来暂停
   if (dPlayer.value) {
-    dPlayer.value.switchVideo({
-      url: ''
-    })
+    dPlayer.value.pause()
   }
   const curFile = allFileList.value[currentIndex.value]
   const url = getUrl(curFile)
@@ -114,8 +109,24 @@ const getCurrentFile = () => {
 }
 // 关闭窗口
 const closeWin = () => {
-  dPlayer.value.switchVideo({
-    url: ''
+  dPlayer.value.pause() // 暂停视频播放器
+}
+
+//上一个下一个
+const next = (index) => {
+  if (currentIndex.value + index < 0 || currentIndex.value + index >= allFileList.value.length) {
+    return
+  }
+  currentIndex.value = currentIndex.value + index
+  getCurrentFile()
+}
+
+//保存文件
+const saveAs = () => {
+  const curFile = allFileList.value[currentIndex.value]
+  window.ipcRenderer.send('saveAs', {
+    partType: curFile.partType,
+    fileId: curFile.fileId
   })
 }
 

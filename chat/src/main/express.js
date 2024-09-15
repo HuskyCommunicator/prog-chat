@@ -70,13 +70,61 @@ expressServer.get('/file', async (req, res) => {
   res.setHeader('Content-Type', contentType)
 
   // 创建文件读取流，并将其内容通过响应管道发送给客户端
+  //当数据为图像或文件时
   if (showCover || fileType != '1') {
-    console.log('正在发送文件内容...')
-
     fs.createReadStream(localPath).pipe(res)
     return
   }
-  fs.createReadStream(localPath).pipe(res)
+  // 获取视频文件的状态信息
+  let stat = fs.statSync(localPath)
+  // 获取视频文件的大小
+  let fileSize = stat.size
+  // 获取请求头中的range字段
+  let range = req.headers.range
+
+  // 如果请求头中包含range字段
+  if (range) {
+    // 使用206状态码表示部分内容响应
+    // 将range字段的值去掉'bytes='前缀，并按'-'分割成数组
+    let parts = range.replace(/bytes=/, '').split('-')
+    // 获取range的起始位置
+    let start = parseInt(parts[0], 10)
+    // 获取range的结束位置，如果没有指定结束位置，则默认结束位置为起始位置加999999
+    let end = parts[1] ? parseInt(parts[1], 10) : start + 999999
+
+    // 确保end不超过文件大小的最后位置
+    end = end > fileSize - 1 ? fileSize - 1 : end
+
+    // 计算要发送的内容长度
+    let chunksize = end - start + 1
+    // 创建文件读取流，指定读取的起始和结束位置
+    let stream = fs.createReadStream(localPath, {
+      start,
+      end
+    })
+    // 设置响应头，包含内容范围、接受范围、内容长度和内容类型
+    let head = {
+      'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+      'Accept-Ranges': 'bytes',
+      'Content-Length': chunksize,
+      'Content-Type': 'video/mp4'
+    }
+    // 发送206状态码和响应头
+    res.writeHead(206, head)
+    // 将文件流写入响应
+    stream.pipe(res)
+  } else {
+    // 如果请求头中不包含range字段
+    // 设置响应头，包含内容长度和内容类型
+    let head = {
+      'Content-Length': fileSize,
+      'Content-Type': 'video/mp4'
+    }
+    // 发送200状态码和响应头
+    res.writeHead(200, head)
+    // 将整个文件流写入响应
+    fs.createReadStream(localPath).pipe(res)
+  }
 })
 
 //关闭express服务

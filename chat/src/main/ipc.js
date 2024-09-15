@@ -4,7 +4,7 @@ import { initWs } from './wsClient.js'
 import { addUserSetting } from './db/UserSettingModel.js'
 import { delChatSession, readAll, selectUserSessionList, topChatSession, updateSessionInfo4Message } from './db/ChatSessionUserModel.js'
 import { saveMessage, selectMessageList, updateMessage } from './db/ChatMessageModel.js'
-import { createCover, saveFile2Local } from './file.js'
+import { createCover, saveAs, saveFile2Local } from './file.js'
 import { openWindow } from '../utils/window/openWindow.js'
 
 // 处理登录或注册事件
@@ -125,5 +125,12 @@ export const onCreateCover = () => {
 export const onOpenNewWindow = () => {
   ipcMain.on('newWindow', (e, config) => {
     openWindow(config)
+  })
+}
+
+//聊天界面的主动保存文件
+export const onSaveAs = () => {
+  ipcMain.on('saveAs', async (e, data) => {
+    saveAs(data)
   })
 }
