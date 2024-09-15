@@ -1,92 +1,147 @@
 <script setup>
 // 导入必要的模块和组件
-import DPlayer from 'dplayer'
-import 'viewerjs/dist/viewer.css'
-import { ref, reactive, getCurrentInstance, nextTick, onMounted, onUnmounted } from 'vue'
-import WinOp from '@/components/WinOp.vue'
+import DPlayer from 'dplayer' // 导入DPlayer视频播放器模块
+import 'viewerjs/dist/viewer.css' // 导入Viewer.js的CSS样式文件
+import { component as Viewer } from 'v-viewer' // 从v-viewer中导入Viewer组件
+import { ref, reactive, getCurrentInstance, nextTick, onMounted, onUnmounted } from 'vue' // 从Vue中导入响应式API和生命周期钩子函数
 
 // 获取当前实例的代理
-const { proxy } = getCurrentInstance()
+const { proxy } = getCurrentInstance() // 获取当前组件实例的代理对象
 
 // 定义响应式变量
-const fileList = ref([{ fileType: 0, status: 0 }])
-const currentIndex = ref(0)
-const allFileList = ref([])
-
-const player = ref(null)
-const instance = ref(null)
+const fileList = ref([{ fileType: 0, status: 0 }]) // 定义一个响应式变量fileList，初始值为一个包含fileType和status属性的对象数组
+const currentIndex = ref(0) // 定义一个响应式变量currentIndex，初始值为0
+const allFileList = ref([]) // 定义一个响应式变量allFileList，初始值为空数组
+const instance = ref(null) // 定义一个响应式变量instance，初始值为null
 
 // 定义函数
-const saveAs = () => {}
-const next = (num) => {}
-const closeWin = () => {}
-const viewerMy = ref(null)
-const isOne2One = ref(false)
+const saveAs = () => {} // 定义一个空函数saveAs
+const next = (num) => {} // 定义一个空函数next，接收一个参数num
 
 // 图片展示选项
 const options = ref({
-  inline: true,
-  toolbar: false,
-  navbar: false,
-  button: false,
-  title: false,
-  zoomRatio: 0.1,
-  zoomOnWheel: false
+  inline: true, // 是否内联显示
+  toolbar: false, // 是否显示工具栏
+  navbar: false, // 是否显示导航栏
+  button: false, // 是否显示按钮
+  title: false, // 是否显示标题
+  zoomRatio: 0.1, // 缩放比例
+  zoomOnWheel: false // 是否允许滚轮缩放
 })
-
-// 初始化视频播放
-const initd = (e) => {
-  viewerMy.value = e
+const viewerMy = ref(null) // 定义一个响应式变量viewerMy，初始值为null
+const inited = (e) => {
+  viewerMy.value = e // 初始化时，将传入的参数赋值给viewerMy
 }
 
-// 旋转图片
-const rotate = () => {
-  viewerMy.value.rotate(90, true)
-}
-
-// 调整图片大小
-const resize = () => {
-  isOne2One.value = !isOne2One.value
-  if (!isOne2One.value) {
-    viewerMy.value.zoomTo(viewerMy.value.initialImageData.ratio, true)
-  } else {
-    viewerMy.value.zoomTo(1, true)
-  }
-}
-
-// 改变图片大小
+// 放大缩小
 const changeSize = (zoomRatio) => {
-  if (!viewerMy.value) {
-    return
+  viewerMy.value.zoom(zoomRatio, true) // 调用viewerMy的zoom方法，按指定比例缩放
+}
+
+// 旋转
+const rotate = () => {
+  viewerMy.value.rotate(90, true) // 调用viewerMy的rotate方法，旋转90度
+}
+
+// 原始大小
+const isOne2One = ref(false) // 定义一个响应式变量isOne2One，初始值为false
+const resize = () => {
+  isOne2One.value = !isOne2One.value // 切换isOne2One的值
+  if (!isOne2One.value) {
+    viewerMy.value.zoomTo(viewerMy.value.initialImageData.ratio, true) // 如果isOne2One为false，按初始比例缩放
+  } else {
+    viewerMy.value.zoomTo(1, true) // 如果isOne2One为true，按1:1比例缩放
   }
-  viewerMy.value.zoom(zoomRatio, true)
+}
+
+const localServerPort = ref() // 定义一个响应式变量localServerPort
+
+const getUrl = (curFile) => {
+  return `http://localhost:${localServerPort.value}/file?fileId=${curFile.fileId}&partType=${
+    curFile.partType
+  }&fileType=${curFile.fileType}&forceGet=${curFile.forceGet}&${new Date().getTime()}` // 构建文件URL
 }
 
 // 处理滚轮事件
 const onWheel = (e) => {
   if (fileList.value[0].fileType !== 0) {
-    return
+    return // 如果文件类型不是0，直接返回
   }
   if (e.deltaY > 0) {
-    changeSize(0.1)
+    changeSize(0.1) // 如果滚轮向下滚动，放大
   } else {
-    changeSize(-0.1)
+    changeSize(-0.1) // 如果滚轮向上滚动，缩小
   }
+}
+
+// 初始化视频播放器
+const player = ref() // 定义一个响应式变量player
+const dPlayer = ref() // 定义一个响应式变量dPlayer
+const initPlayer = () => {
+  dPlayer.value = new DPlayer({
+    element: player.value, // 视频播放器的DOM元素
+    theme: '#b7daff', // 视频播放器的主题颜色
+    screenshot: true, // 是否启用截图功能
+    video: {
+      url: '', // 视频URL
+      type: 'auto'
+    }
+  })
+}
+
+const getCurrentFile = () => {
+  if (dPlayer.value) {
+    dPlayer.value.switchVideo({
+      url: ''
+    })
+  }
+  const curFile = allFileList.value[currentIndex.value]
+  const url = getUrl(curFile)
+
+  fileList.value.splice(0, 1, {
+    url: url,
+    fileType: curFile.fileType,
+    status: 1,
+    fileSize: curFile.fileSize,
+    fileName: curFile.fileName
+  })
+  console.log(url)
+  if (curFile.fileType == 1) {
+    dPlayer.value.switchVideo({
+      url: url
+    })
+  }
+}
+// 关闭窗口
+const closeWin = () => {
+  dPlayer.value.switchVideo({
+    url: ''
+  })
 }
 
 // 组件挂载时的操作
 onMounted(() => {
-  window.addEventListener('wheel', onWheel)
+  initPlayer() // 初始化视频播放器
+
+  window.addEventListener('wheel', onWheel) // 添加滚轮事件监听
 
   window.ipcRenderer.on('pageInitData', (e, data) => {
-    allFileList.value = data.fileList
+    localServerPort.value = data.localServerPort // 设置本地服务器端口
+    allFileList.value = data.fileList // 设置所有文件列表
+    let index = 0
+    if (data.currentFileId) {
+      index = data.fileList.findIndex((item) => item.fileId === data.currentFileId) // 查找当前文件索引
+      index = index == -1 ? 0 : index // 如果未找到，设置索引为0
+    }
+    currentIndex.value = index // 设置当前索引
+    getCurrentFile() // 获取当前文件
   })
 })
 
 // 组件卸载时的操作
 onUnmounted(() => {
-  window.ipcRenderer.removeAllListeners('pageInitData')
-  window.removeEventListener('wheel', onWheel)
+  window.ipcRenderer.removeAllListeners('pageInitData') // 移除所有pageInitData事件监听
+  window.removeEventListener('wheel', onWheel) // 移除滚轮事件监听
 })
 </script>
 
@@ -118,7 +173,7 @@ onUnmounted(() => {
       <div class="iconfont icon-download" @dblclick.stop @click="saveAs" title="另存为..."></div>
     </div>
     <div class="media-panel">
-      <viewer :options="options" @initd="initd" :images="fileList" v-if="fileList[0].fileType == 0 && fileList[0].status == 1">
+      <viewer :options="options" @inited="inited" :images="fileList" v-if="fileList[0].fileType == 0 && fileList[0].status == 1">
         <img :src="fileList[0].url" />
       </viewer>
       <div ref="player" id="player" v-show="fileList[0].fileType == 1 && fileList[0].status == 1" style="width: 100%; height: 100%"></div>

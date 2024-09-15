@@ -200,10 +200,10 @@ const downloadFile = (fileId, showCover, savePath, partType) => {
       // 如果 partType 是 'avatar'
       if (partType == 'avatar') {
         // 读取默认用户头像并写入流
-        fs.createReadStream(resourcesPath + '/assets/user.png').pipe(stream)
+        fs.createReadStream(resourcesPath + 'assets/user.png').pipe(stream)
       } else {
         // 读取 404 图片并写入流
-        fs.createReadStream(resourcesPath + '/assets/404.png').pipe(stream)
+        fs.createReadStream(resourcesPath + 'assets/404.png').pipe(stream)
       }
     } else {
       // 将响应数据写入流

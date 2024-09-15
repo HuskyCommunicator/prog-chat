@@ -31,11 +31,12 @@ const image_suffix = '.png'
 //
 expressServer.get('/file', async (req, res) => {
   let { partType, fileType, fileId, showCover, forceGet } = req.query
-  // console.log('Request received:', { partType, fileType, fileId, showCover, forceGet })
+  console.log('收到请求,信息为: fileId:', fileId, 'partType:', partType, 'fileType:', fileType, 'showCover:')
 
   // 如果没有指定partType或fileId，则返回错误
   if (!partType || !fileId) {
-    return res.status(400).send('请求参数错误')
+    res.status(400).send('请求参数错误')
+    return
   }
 
   // 确保 showCover 始终是一个布尔值
@@ -45,8 +46,6 @@ expressServer.get('/file', async (req, res) => {
 
   // 在文件不存在或需要强制下载时，执行文件下载操作
   if (!fs.existsSync(localPath) || forceGet == 'true') {
-    //  console.log('File does not exist or forceGet is true, downloading file...')
-    // 获取头像原图
     await downloadFile(fileId, showCover, localPath, partType)
     if (forceGet == 'true' && partType == 'avatar') {
       // 获取头像缩略图
@@ -72,9 +71,12 @@ expressServer.get('/file', async (req, res) => {
 
   // 创建文件读取流，并将其内容通过响应管道发送给客户端
   if (showCover || fileType != '1') {
+    console.log('正在发送文件内容...')
+
     fs.createReadStream(localPath).pipe(res)
     return
   }
+  fs.createReadStream(localPath).pipe(res)
 })
 
 //关闭express服务
