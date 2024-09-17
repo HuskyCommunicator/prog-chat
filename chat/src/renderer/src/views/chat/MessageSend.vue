@@ -1,31 +1,22 @@
 <script setup>
-import { ref, reactive, getCurrentInstance, nextTick } from 'vue'
+import { ref, reactive, getCurrentInstance, nextTick, onMounted, onUnmounted } from 'vue'
 import { useUserInfoStore } from '@/stores/UserInfoStore.js'
 import emojiList from '@/utils/Emoji.js'
 import SearchAdd from '@/views/contact/SearchAdd.vue'
 import { getFileType } from '@/utils/Constants.js'
-
+import { useSysSettingStore } from '@/stores/SysSettingStore'
 // 获取用户信息存储
 const userInfoStore = useUserInfoStore()
+const sysSettingStore = useSysSettingStore()
 // 获取当前实例的代理
 const { proxy } = getCurrentInstance()
 
 const activeEmoji = ref('笑脸')
 const msgContent = ref('')
-const fileLimit = 10
+
 //文件个数超过指定值
 const uploadExceed = (files) => {
   checkFileLimit(files)
-}
-const checkFileLimit = (files) => {
-  if (files.length > fileLimit) {
-    proxy.Confirm({
-      message: `一次最多可以上传10个文件`,
-      showCancelBtn: false
-    })
-    return
-  }
-  return true
 }
 
 // 定义事件发射器
@@ -70,6 +61,10 @@ const sendMessageDo = async (
   },
   cleanMsgContent
 ) => {
+  if (!checkFileSize(messageObj.fileType, messageObj.fileSize, messageObj.fileName)) {
+    return
+  }
+
   // 判断文件大小
   if (messageObj.fileSize == 0) {
     proxy.Confirm({
@@ -165,8 +160,6 @@ const addContact = (contactId, code) => {
   })
 }
 
-const pasteFile = () => {}
-
 //表情相关
 const sendEmoji = (emoji) => {
   msgContent.value = msgContent.value + emoji
@@ -190,6 +183,108 @@ const openPopover = () => {
 const closePopover = () => {
   document.removeEventListener('click', hidePopover, false)
 }
+
+//校验文件大小
+const checkFileSize = (fileType, fileSize, fileName) => {
+  const SIZE_MB = 30 * 1024 * 1024
+  const settingArray = Object.values(sysSettingStore.getSetting())
+  //图片
+  if (fileSize > settingArray[fileType] * SIZE_MB) {
+    proxy.Confirm({
+      message: `文件${fileName}超过大小${settingArray[fileType]}MB限制`,
+      showCancelBtn: false
+    })
+    return false
+  }
+  return true
+}
+
+//校验文件发送数量
+const fileLimit = 10
+const checkFileLimit = (files) => {
+  if (files.length > fileLimit) {
+    proxy.Confirm({
+      message: `一次最多可以上传10个文件`,
+      showCancelBtn: false
+    })
+    return
+  }
+  return true
+}
+
+//拖入文件
+const dragOverHandler = (e) => {
+  e.preventDefault()
+}
+
+const dropHandler = (e) => {
+  e.preventDefault()
+  const files = e.dataTransfer.files
+  if (!checkFileLimit(files)) {
+    return
+  }
+  for (let i = 0; i < files.length; i++) {
+    uploadFileDo(files[i])
+  }
+}
+
+// 截图粘贴上传文件
+const pasteFile = async (event) => {
+  // 获取剪贴板中的项目
+  let items = event.clipboardData && event.clipboardData.items
+  // 创建一个对象来存储文件数据
+  const fileData = {}
+  // 遍历剪贴板中的项目
+  for (const item of items) {
+    // 如果项目不是文件类型，则跳过
+    if (item.kind != 'file') {
+      break
+    }
+    // 获取文件对象
+    const file = await item.getAsFile()
+    // 如果文件路径不为空，直接上传文件
+    if (file.path != '') {
+      uploadFileDo(file)
+    } else {
+      // 否则，将文件转换为临时图片文件
+      const imageFile = new File([file], 'temp.jpg')
+      // 创建一个 FileReader 对象
+      let fileReader = new FileReader()
+      // 当文件读取完成后执行的函数
+      fileReader.onloadend = function () {
+        // 读取完成后获得结果
+        const byteArray = new Uint8Array(this.result)
+        // 将结果存储到 fileData 对象中
+        fileData.byteArray = byteArray
+        fileData.name = imageFile.name
+        // 通过 ipcRenderer 发送文件数据到主进程
+        window.ipcRenderer.send('saveClipBoardFile', fileData)
+      }
+      // 以 ArrayBuffer 格式读取文件
+      fileReader.readAsArrayBuffer(imageFile)
+    }
+  }
+}
+
+onMounted(() => {
+  window.ipcRenderer.on('saveClipBoardFileCallback', (e, file) => {
+    const fileType = 0
+    sendMessageDo(
+      {
+        messageContent: '[' + getFileType(fileType) + ']',
+        messageType: 5,
+        fileSize: file.size,
+        fileName: file.name,
+        filePath: file.path,
+        fileType: fileType
+      },
+      false
+    )
+  })
+})
+onUnmounted(() => {
+  window.ipcRenderer.removeAllListeners('saveClipBoardFileCallback')
+})
 </script>
 
 <template>

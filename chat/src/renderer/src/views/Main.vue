@@ -3,10 +3,12 @@ import { ref, reactive, getCurrentInstance, nextTick, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserInfoStore } from '@/stores/UserInfoStore'
 import { useGlobalInfoStore } from '@/stores/GlobalInfoStore'
+import { useSysSettingStore } from '@/stores/SysSettingStore'
 const globalInfoStore = useGlobalInfoStore()
 const userInfoStore = useUserInfoStore()
 const router = useRouter()
 const { proxy } = getCurrentInstance()
+const sysSettingStore = useSysSettingStore()
 const menuList = ref([
   {
     name: 'chat',
@@ -51,8 +53,21 @@ const getLocalServerPort = () => {
     globalInfoStore.setInfo('localServerPort', serverPort)
   })
 }
+
+const getSysSetting = async () => {
+  let result = await proxy.Request({
+    url: proxy.Api.getSysSetting,
+    params: {}
+  })
+  if (!result) {
+    return
+  }
+  sysSettingStore.setSetting(result.data)
+}
+
 onMounted(() => {
   getLoginInfo()
+  getSysSetting()
 })
 </script>
 

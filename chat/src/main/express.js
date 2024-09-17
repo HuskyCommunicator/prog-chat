@@ -31,7 +31,6 @@ const image_suffix = '.png'
 //
 expressServer.get('/file', async (req, res) => {
   let { partType, fileType, fileId, showCover, forceGet } = req.query
-  console.log('收到请求,信息为: fileId:', fileId, 'partType:', partType, 'fileType:', fileType, 'showCover:')
 
   // 如果没有指定partType或fileId，则返回错误
   if (!partType || !fileId) {

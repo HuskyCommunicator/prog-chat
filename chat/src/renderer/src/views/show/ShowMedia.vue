@@ -100,7 +100,6 @@ const getCurrentFile = () => {
     fileSize: curFile.fileSize,
     fileName: curFile.fileName
   })
-  console.log(url)
   if (curFile.fileType == 1) {
     dPlayer.value.switchVideo({
       url: url

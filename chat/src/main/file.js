@@ -192,6 +192,12 @@ const getLocalFilePath = async (partType, showCover, fileId) => {
       }
       // 生成本地文件路径
       localPath = localFolder + '\\' + fileId + fileSuffix
+    } else if (partType == 'temp') {
+      localFolder = localFolder + '/temp/'
+      if (!fs.existsSync(localFolder)) {
+        mkdirs(localFolder)
+      }
+      localPath = localFolder + '/' + fileId
     }
     if (showCover) {
       localPath = localPath + cover_image_suffix
@@ -312,4 +318,24 @@ const saveAs = async ({ partType, fileId }) => {
   fs.copyFileSync(localPath, filePath)
 }
 
-export { saveFile2Local, getLocalFilePath, downloadFile, createCover, saveAs }
+// 保存剪切板内容
+const saveClipBoardFile = async (file) => {
+  // 获取文件后缀名
+  const fileSuffix = file.name.substring(file.name.lastIndexOf('.'))
+  // 获取本地文件路径，存储在 'tmp' 文件夹中，文件名为 'tmp' + 文件后缀名
+  const filePath = await getLocalFilePath('temp', false, 'temp' + fileSuffix)
+  // 获取文件的字节数组
+  let byteArray = file.byteArray
+  // 将字节数组转换为 Buffer 对象
+  const buffer = Buffer.from(byteArray)
+  // 将 Buffer 写入到指定的文件路径
+  fs.writeFileSync(filePath, buffer)
+  // 返回文件的大小、名称和路径
+  return {
+    size: byteArray.length,
+    name: file.name,
+    path: filePath
+  }
+}
+
+export { saveFile2Local, getLocalFilePath, downloadFile, createCover, saveAs, saveClipBoardFile }
