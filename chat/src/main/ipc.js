@@ -90,7 +90,7 @@ export const onLoadChatMessage = () => {
 export const onAddLocalMessage = () => {
   ipcMain.on('addLocalMessage', async (e, data) => {
     await saveMessage(data)
-    if ((data.messageType = 5)) {
+    if (data.messageType == 5) {
       await saveFile2Local(data.messageId, data.filePath, data.fileType)
 
       const updateInfo = {

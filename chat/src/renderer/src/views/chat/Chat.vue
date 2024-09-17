@@ -6,6 +6,8 @@ import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css'
 import 'default-passive-events'
 import MessageSend from './MessageSend.vue'
 import ChatMessage from './ChatMessage.vue'
+import ChatMessageTime from './ChatMessageTime.vue'
+import ChatMessageSys from './ChatMessageSys.vue'
 // 获取当前实例的代理对象
 const { proxy } = getCurrentInstance()
 
@@ -33,6 +35,9 @@ const chatSessionList = ref([])
 const loadChatSession = () => {
   window.ipcRenderer.send('loadSessionData')
 }
+
+//是否滚动到底部 距离值
+let distanceBottom = ref(0)
 
 // 设置置顶
 const setTop = (data) => {
@@ -98,6 +103,7 @@ const onContextMenu = (e, data) => {
 
 //切换会话
 const chatSessionClickHandler = (item) => {
+  distanceBottom = 0
   currentChatSession.value = Object.assign({}, item)
   //TODO清空消息记录数
   messageList.value = []
@@ -189,12 +195,17 @@ const onLoadChatMessage = () => {
     dataList.sort((a, b) => {
       return a.messageId - b.messageId
     })
+    const lastMessage = messageList.value[0]
     messageList.value = dataList.concat(messageList.value)
     messageCountInfo.pageNo = pageNo
     messageCountInfo.pageTotal = pageTotal
     if (pageNo == 1) {
       messageCountInfo.maxMessageId = dataList.length > 0 ? dataList[dataList.length - 1].messageId : null
       goToBottom()
+    } else {
+      nextTick(() => {
+        document.querySelector('#message' + lastMessage.messageId).scrollIntoView()
+      })
     }
   })
 }
@@ -213,9 +224,21 @@ const onAddLocalMessage = () => {
 }
 // 组件挂载时的初始化操作
 onMounted(() => {
-  onReceiveMessage(), loadChatSession(), onLoadSessionData(), onLoadChatMessage(), onAddLocalMessage()
+  onReceiveMessage(), loadChatSession(), onLoadSessionData(), onLoadChatMessage(), onAddLocalMessage(), loadMoreMessage()
 })
 
+//上滑时加载更多消息
+const loadMoreMessage = () => {
+  const messagePanel = document.getElementById('message-panel')
+  messagePanel.addEventListener('scroll', (e) => {
+    const scrollTop = e.target.scrollTop
+    //计算距离底部的距离
+    distanceBottom = e.target.scrollHeight - (scrollTop + e.target.offsetHeight)
+    if (scrollTop == 0 && messageList.value.length > 0) {
+      loadChatMessage()
+    }
+  })
+}
 // 组件卸载时的清理操作
 onUnmounted(() => {
   window.ipcRenderer.removeAllListeners('receiveChatMessage')
@@ -250,6 +273,11 @@ const sendMessage4LocalHandler = (messageObj) => {
 const goToBottom = () => {
   // 在下一个 DOM 更新周期后执行回调函数
   nextTick(() => {
+    //距离底部超过200时不滚动
+    if (distanceBottom > 200) {
+      return
+    }
+
     // 选择所有具有类名 'message-item' 的 DOM 元素
     const items = document.querySelectorAll('.message-item')
     // 如果找到的元素数量大于 0
@@ -322,6 +350,26 @@ const showMediaDetailHandler = (messageId) => {
       <div class="chat-panel" v-show="Object.keys(currentChatSession).length > 0">
         <div class="message-panel" id="message-panel">
           <div class="message-item" v-for="(data, index) in messageList" :id="'message' + data.messageId">
+            <!-- 展示时间 -->
+            <template
+              v-if="index > 1 && data.sendTime - messageList[index - 1].sendTime >= 300000 && (data.messageType == 2 || data.messageType == 5)"
+            >
+              <ChatMessageTime :data="data"></ChatMessageTime>
+            </template>
+            <!-- 展示系统消息 -->
+            <template
+              v-if="
+                data.messageType == 3 ||
+                data.messageType == 1 ||
+                data.messageType == 9 ||
+                data.messageType == 8 ||
+                data.messageType == 11 ||
+                data.messageType == 12
+              "
+            >
+              <ChatMessageSys :data="data"></ChatMessageSys>
+            </template>
+            <!--  -->
             <template v-if="data.messageType == 1 || data.messageType == 2 || data.messageType == 5">
               <ChatMessage :data="data" :currentChatSession="currentChatSession" @showMediaDetail="showMediaDetailHandler"></ChatMessage>
             </template>
