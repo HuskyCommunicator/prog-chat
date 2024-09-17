@@ -1,6 +1,7 @@
 <script setup>
 import { ref, reactive, getCurrentInstance, nextTick } from 'vue'
-
+import { useAvatarUpdateStore } from '@/stores/AvatarUpdateStore'
+const avatarUpdateStore = useAvatarUpdateStore()
 // 获取当前实例
 const { proxy } = getCurrentInstance()
 
@@ -15,12 +16,18 @@ const formDataRef = ref()
 // 表单验证规则
 const rules = {
   groupName: [{ required: true, message: '请输入群名称' }],
-  joinType: [{ required: true, message: '请选择加入权限' }]
-  // avatarFile: [{ required: true, message: "请选择头像" }],
+  joinType: [{ required: true, message: '请选择加入权限' }],
+  avatarFile: [{ required: true, message: '请选择头像' }]
 }
 
 // 定义事件发射器
 const emit = defineEmits('editBack')
+
+//保存封面
+const saveCover = ({ avatarFile, coverFile }) => {
+  formData.value.avatarFile = avatarFile
+  formData.value.avatarCover = coverFile
+}
 
 // 提交表单函数
 const submit = async () => {
@@ -29,7 +36,9 @@ const submit = async () => {
       return
     }
     let params = {}
-    // TODO: 重新加载头像
+    if (params.groupId) {
+      avatarUpdateStore.setForceReload(params.groupId, false)
+    }
     Object.assign(params, formData.value)
     let result = await proxy.Request({
       url: proxy.Api.saveGroup,
@@ -47,7 +56,9 @@ const submit = async () => {
     formDataRef.value.resetFields()
 
     contactStateStore.setContactReload('MY')
-    // TODO: 重新加载头像
+    if (params.groupId) {
+      avatarUpdateStore.setForceReload(params.groupId, true)
+    }
   })
 }
 const show = (data) => {
@@ -61,7 +72,6 @@ const show = (data) => {
   formData.value.avatarFile = data.groupId
 }
 defineExpose({ show })
-const saveCover = () => {}
 </script>
 
 <template>
@@ -83,7 +93,16 @@ const saveCover = () => {}
     </el-form-item>
     <!--  -->
     <el-form-item label="公告" prop="groupNotice">
-      <el-input clearable placeholder="请输入群公告" v-model.trim="formData.groupNotice" type="textarea" rows="5" maxlength="300" :show-word-limit="true" resize="none"></el-input>
+      <el-input
+        clearable
+        placeholder="请输入群公告"
+        v-model.trim="formData.groupNotice"
+        type="textarea"
+        :rows="5"
+        maxlength="300"
+        :show-word-limit="true"
+        resize="none"
+      ></el-input>
     </el-form-item>
 
     <el-form-item>

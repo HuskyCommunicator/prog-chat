@@ -8,6 +8,7 @@ import MessageSend from './MessageSend.vue'
 import ChatMessage from './ChatMessage.vue'
 import ChatMessageTime from './ChatMessageTime.vue'
 import ChatMessageSys from './ChatMessageSys.vue'
+import ChatGroupDetail from './ChatGroupDetail.vue'
 // 获取当前实例的代理对象
 const { proxy } = getCurrentInstance()
 
@@ -99,6 +100,12 @@ const onContextMenu = (e, data) => {
       }
     ]
   })
+}
+
+//展示群聊信息
+const chatGroupDetailRef = ref()
+const showGroupDetail = () => {
+  chatGroupDetailRef.value.show(currentChatSession.value.contactId)
 }
 
 //切换会话
@@ -382,6 +389,7 @@ const showMediaDetailHandler = (messageId) => {
       </div>
     </template>
   </Layout>
+  <ChatGroupDetail ref="chatGroupDetailRef" @delChatSessionCallback="delChatSession"></ChatGroupDetail>
 </template>
 
 <style lang="scss" scoped>

@@ -100,7 +100,7 @@ const cancel = () => {
           placeholder="请输入个性签名"
           v-model.trim="formData.personalSignature"
           type="textarea"
-          rows="5"
+          :rows="5"
           maxlength="30"
           :show-word-limit="true"
           resize="none"

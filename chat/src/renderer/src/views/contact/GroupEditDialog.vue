@@ -21,15 +21,21 @@ const dialogConfig = ref({
 const groupEditRef = ref(null)
 
 // 显示对话框函数
+// const show = (data) => {
+//   if (groupEditRef.value && typeof groupEditRef.value.show === 'function') {
+//     nextTick(() => {
+//       groupEditRef.value.show(data)
+//     })
+//   } else {
+//     console.error('groupEditRef is not defined.')
+//   }
+//   dialogConfig.value.show = true
+// }
 const show = (data) => {
-  if (groupEditRef.value && typeof groupEditRef.value.show === 'function') {
-    nextTick(() => {
-      groupEditRef.value.show(data)
-    })
-  } else {
-    console.error('groupEditRef is not defined.')
-  }
   dialogConfig.value.show = true
+  nextTick(() => {
+    groupEditRef.value.show(data)
+  })
 }
 
 // 定义事件发射器
@@ -46,7 +52,14 @@ defineExpose({ show })
 </script>
 
 <template>
-  <Dialog :show="dialogConfig.show" :title="dialogConfig.title" :buttons="dialogConfig.buttons" width="400px" :showCancel="false" @close="dialogConfig.show = false">
+  <Dialog
+    :show="dialogConfig.show"
+    :title="dialogConfig.title"
+    :buttons="dialogConfig.buttons"
+    width="400px"
+    :showCancel="false"
+    @close="dialogConfig.show = false"
+  >
     <GroupEditForm ref="groupEditRef" @editBack="editBack"></GroupEditForm>
   </Dialog>
 </template>

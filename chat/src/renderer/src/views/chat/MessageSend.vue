@@ -334,7 +334,7 @@ onUnmounted(() => {
     <!-- 输入框 -->
     <div class="input-area" @drop="dropHandler" @dragover="dragOverHandler">
       <el-input
-        rows="5"
+        :rows="5"
         v-model="msgContent"
         type="textarea"
         resize="none"
